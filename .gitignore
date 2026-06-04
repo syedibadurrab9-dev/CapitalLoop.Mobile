@@ -1,5 +1,12 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+# Core CapitalLoop Environment Configurations (Do Not Commit Secrets)
+.env
+.env.development
+.env.staging
+.env.production
+.env*.local
+
 # dependencies
 node_modules/
 
@@ -29,9 +36,6 @@ yarn-error.*
 # macOS
 .DS_Store
 *.pem
-
-# local env files
-.env*.local
 
 # typescript
 *.tsbuildinfo

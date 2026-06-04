@@ -1,25 +1,43 @@
 {
   "expo": {
     "name": "CapitalLoop",
-    "slug": "CapitalLoop",
+    "slug": "capitalloopmobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0F172A",
+    "scheme": "capitalloop",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ibad.capitalloop",
+      "infoPlist": {
+        "NSCameraUsageDescription": "CapitalLoop requires access to your camera to seamlessly scan your Binance API Management desktop QR codes."
+      }
     },
     "android": {
+      "package": "com.ibad.capitalloop",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#0F172A"
       },
-      "predictiveBackGestureEnabled": false
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    }
+    "plugins": [
+      "expo-dev-client",
+      "@react-native-google-signin/google-signin",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow CapitalLoop to access your device camera to scan account desktop links smoothly."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "f4cee159-4309-41b4-8c9f-d4d664a9520a"
+      }
+    },
+    "owner": "syedibadshah"
   }
 }
