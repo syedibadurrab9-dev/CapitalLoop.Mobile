@@ -2,8 +2,8 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { AssetNode } from '../store/portfolioSlice';
 
-// Core color system aligned across the dashboard chart matrices
-const CHART_COLORS = ['#6366F1', '#10B981', '#F59E0B', '#0EA5E9', '#EC4899', '#8B5CF6'];
+// Core light-mode color system aligned across the dashboard chart matrices
+const CHART_COLORS = ['#2563EB', '#10B981', '#F59E0B', '#0EA5E9', '#EC4899', '#8B5CF6'];
 
 export const PortfolioChart = ({ assets }: { assets: AssetNode[] }) => {
   // Aggregate absolute overall portfolio value in localized PKR
@@ -11,7 +11,7 @@ export const PortfolioChart = ({ assets }: { assets: AssetNode[] }) => {
   
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Visual Asset Density</Text>
+      <Text style={styles.title}>Asset Allocation</Text>
       
       {/* Structural Distribution Bar Stack */}
       <View style={styles.barContainer}>
@@ -42,8 +42,14 @@ export const PortfolioChart = ({ assets }: { assets: AssetNode[] }) => {
           return (
             <View key={asset.id} style={styles.legendItem}>
               <View style={[styles.dot, { backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }]} />
-              <Text style={styles.legendTxt}>
-                {asset.name} <Text style={styles.percentageTxt}>{pct.toFixed(1)}%</Text>
+              
+              {/* 🚀 FIXED: Dynamic flex-shrink layout allows text to utilize maximum space without cutting off early */}
+              <Text style={styles.legendTxt} numberOfLines={1}>
+                {asset.name}
+              </Text>
+              
+              <Text style={styles.percentageTxt}>
+                {pct.toFixed(1)}%
               </Text>
             </View>
           );
@@ -55,56 +61,71 @@ export const PortfolioChart = ({ assets }: { assets: AssetNode[] }) => {
 
 const styles = StyleSheet.create({
   container: { 
-    backgroundColor: '#1E293B', 
-    padding: 20, 
-    borderRadius: 20, 
+    backgroundColor: '#FFFFFF', 
+    padding: 24, 
+    borderRadius: 24, 
     borderWidth: 1, 
-    borderColor: '#334155', 
-    marginVertical: 16 
+    borderColor: '#E2E8F0', 
+    marginVertical: 16,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    elevation: 2
   },
   title: { 
-    fontSize: 13, 
+    fontSize: 14, 
     fontWeight: '700', 
-    color: '#94A3B8', 
-    textTransform: 'uppercase', 
-    letterSpacing: 0.5, 
-    marginBottom: 14 
+    color: '#334155', 
+    letterSpacing: -0.2, 
+    marginBottom: 16 
   },
   barContainer: { 
-    height: 12, 
+    height: 14, 
     width: '100%', 
-    backgroundColor: '#0F172A', 
-    borderRadius: 6, 
+    backgroundColor: '#F1F5F9', 
+    borderRadius: 7, 
     flexDirection: 'row', 
-    overflow: 'hidden' 
+    overflow: 'hidden',
+    gap: 1 
   },
-  segment: { height: '100%' },
+  segment: { 
+    height: '100%' 
+  },
   legendRow: { 
     flexDirection: 'row', 
     flexWrap: 'wrap', 
-    marginTop: 16 
+    marginTop: 18,
+    rowGap: 12,
+    columnGap: 16 /* Generates premium negative space gaps between wrapped legend items */
   },
   legendItem: { 
     flexDirection: 'row', 
-    alignItems: 'center', 
-    marginRight: 14, 
-    marginVertical: 4 
+    alignItems: 'center',
+    // 🚀 FIXED: Dynamic width behavior lets items size themselves gracefully based on layout density
+    minWidth: '45%',
+    maxWidth: '100%',
+    paddingVertical: 2
   },
   dot: { 
     width: 8, 
     height: 8, 
     borderRadius: 4, 
-    marginRight: 6 
+    marginRight: 8 
   },
   legendTxt: { 
-    color: '#94A3B8', // Lifted visibility to align with dark mode card layouts
+    color: '#475569', 
     fontSize: 12, 
-    fontWeight: '600' 
+    fontWeight: '600',
+    letterSpacing: -0.1,
+    marginRight: 6,
+    // 🚀 FIXED: Safely compresses text labels to allow adjacent percentage metrics to render flawlessly
+    flexShrink: 1
   },
   percentageTxt: {
-    color: '#38BDF8', // Cyan callout styling for clear visual scanning
+    color: '#2563EB', 
     fontWeight: '700',
-    fontSize: 11,
-    marginLeft: 2
+    fontSize: 12,
+    fontVariant: ['tabular-nums']
   }
 });

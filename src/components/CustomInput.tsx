@@ -7,7 +7,7 @@ interface InputProps {
   onChangeText: (t: string) => void;
   placeholder: string;
   keyboardType?: 'default' | 'numeric';
-  secureTextEntry?: boolean; // Added support for password/secret key inputs
+  secureTextEntry?: boolean;
 }
 
 export const CustomInput = ({ 
@@ -31,7 +31,7 @@ export const CustomInput = ({
           value={value} 
           onChangeText={onChangeText}
           placeholder={placeholder} 
-          placeholderTextColor="#475569" 
+          placeholderTextColor="#94A3B8" /* Highly legible accessible light placeholder */
           keyboardType={keyboardType}
           secureTextEntry={isPasswordSecretHidden}
           autoCapitalize="none"
@@ -43,10 +43,10 @@ export const CustomInput = ({
           <TouchableOpacity 
             style={styles.toggleButton} 
             onPress={() => setIsPasswordSecretHidden(!isPasswordSecretHidden)}
-            activeOpacity={0.7}
+            activeOpacity={0.6}
           >
             <Text style={styles.toggleText}>
-              {isPasswordSecretHidden ? 'SHOW' : 'HIDE'}
+              {isPasswordSecretHidden ? 'Show' : 'Hide'}
             </Text>
           </TouchableOpacity>
         )}
@@ -56,31 +56,37 @@ export const CustomInput = ({
 };
 
 const styles = StyleSheet.create({
-  group: { marginBottom: 18 },
+  group: { 
+    marginBottom: 20 
+  },
   label: { 
-    fontSize: 11, 
-    color: '#94A3B8', 
-    fontWeight: '700', 
-    marginBottom: 8, 
-    textTransform: 'uppercase', 
-    letterSpacing: 0.75 
+    fontSize: 13, 
+    color: '#334155', /* High-contrast clean slate ink */
+    fontWeight: '600', 
+    marginBottom: 8,
+    letterSpacing: -0.1
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1E293B',
-    borderRadius: 12,
+    backgroundColor: '#FFFFFF', /* Pristine crisp paper white */
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#334155',
-    position: 'relative'
+    borderColor: '#E2E8F0', /* Feather-light tracking boundary lines */
+    position: 'relative',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 4,
+    elevation: 1
   },
   input: { 
     flex: 1,
-    color: '#FFFFFF', 
+    color: '#0F172A', /* High-contrast elegant dark ink text input */
     paddingHorizontal: 16, 
     paddingVertical: 14, 
     fontSize: 15,
-    paddingRight: 64 // Prevent textual content from clipping behind the toggle text
+    paddingRight: 64
   },
   toggleButton: {
     position: 'absolute',
@@ -89,9 +95,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   toggleText: {
-    color: '#38BDF8', // Cyan-blue theme color for interactable actions
-    fontSize: 11,
+    color: '#2563EB', /* Bold institutional digital sapphire blue */
+    fontSize: 12,
     fontWeight: '700',
-    letterSpacing: 0.5
+    letterSpacing: -0.1
   }
 });

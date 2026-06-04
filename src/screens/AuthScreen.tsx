@@ -17,7 +17,6 @@ export default function AuthScreen(): React.JSX.Element {
   // ==========================================
   useEffect(() => {
     GoogleSignin.configure({
-      // Hooked up directly via environment matrix variable injection
       webClientId: WEB_CLIENT_ID,
       offlineAccess: true, 
     });
@@ -33,13 +32,10 @@ export default function AuthScreen(): React.JSX.Element {
       // 1. Verify native system core services availability
       await GoogleSignin.hasPlayServices();
       
-      // 2. 🔥 FORCE ACCOUNT SELECTION POP-UP
-      // Clears the on-device token cache tracking so the Android OS
-      // does not silently pass your last used profile without asking.
+      // 2. FORCE ACCOUNT SELECTION POP-UP
       try {
         await GoogleSignin.signOut();
       } catch (signOutErr) {
-        // Safe catch-all block: ignores failures if no prior active profile exists
         console.log("ℹ️ No active Google session tracking required clearance.");
       }
       
@@ -56,7 +52,7 @@ export default function AuthScreen(): React.JSX.Element {
         console.log("✅ Cryptographic ID Token extracted out of native OS parameters");
 
         // ==========================================
-        // 🔥 SECURE BACKEND HANDSHAKE (.NET)
+        // SECURE BACKEND HANDSHAKE (.NET)
         // ==========================================
         const res = await fetch(
           `${BACKEND_API_BASE_URL}/api/Auth/google-sso`,
@@ -77,13 +73,13 @@ export default function AuthScreen(): React.JSX.Element {
         const userData = await res.json();
 
         // ==========================================
-        // 🔥 REDUX SESSION DISPATCH (UPDATED STRUCTURE)
+        // REDUX SESSION DISPATCH
         // ==========================================
         dispatch(setGoogleAuth({
           name: userData.name || 'External User',
           email: userData.email || '',
-          token: userData.accessToken,               // App-issued system JWT
-          isPremiumUser: userData.isPremium ?? false // 🚀 MAPS NATIVE DB STATUS DIRECTLY
+          token: userData.accessToken,
+          isPremiumUser: userData.isPremium ?? false 
         }));
 
         console.log("✅ APPLICATION SESSION INITIALIZED WITH TIERS");
@@ -91,7 +87,6 @@ export default function AuthScreen(): React.JSX.Element {
     } catch (err: any) {
       console.error("[AUTH INTENT CRASH]", err);
       
-      // Route exceptions safely to isolate configuration discrepancies
       if (err.code === statusCodes.SIGN_IN_CANCELLED) {
         console.log("⚠️ Authentication session was closed or canceled by user context.");
       } else if (err.code === statusCodes.IN_PROGRESS) {
@@ -111,7 +106,7 @@ export default function AuthScreen(): React.JSX.Element {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0F172A" />
+      <StatusBar barStyle="dark-content" backgroundColor="#F1F5F9" />
 
       <View style={styles.logoGroup}>
         <View style={styles.logoIcon}>
@@ -120,7 +115,7 @@ export default function AuthScreen(): React.JSX.Element {
 
         <Text style={styles.brandTitle}>CapitalLoop</Text>
         <Text style={styles.brandTag}>
-          Cross-Border Wealth Integration Protocol
+          Track your net worth seamlessly
         </Text>
       </View>
 
@@ -133,7 +128,7 @@ export default function AuthScreen(): React.JSX.Element {
         />
 
         <Text style={styles.footerNotice}>
-          🔒 Tier-1 Federated Identity Assertion Gated Module
+          🔒 Secure login powered by Google SSO
         </Text>
       </View>
     </View>
@@ -143,7 +138,7 @@ export default function AuthScreen(): React.JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: '#F1F5F9',
     padding: 24,
     justifyContent: 'space-between'
   },
@@ -153,36 +148,46 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   logoIcon: {
-    width: 80,
-    height: 80,
+    width: 88,
+    height: 88,
     borderRadius: 24,
-    backgroundColor: '#1E293B',
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#334155',
-    marginBottom: 20
+    borderColor: '#E2E8F0',
+    marginBottom: 20,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    elevation: 2
   },
-  txtIcon: { fontSize: 36 },
+  txtIcon: { 
+    fontSize: 38 
+  },
   brandTitle: {
     fontSize: 32,
     fontWeight: '800',
-    color: '#FFFFFF'
+    color: '#0F172A',
+    letterSpacing: -0.5
   },
   brandTag: {
-    fontSize: 13,
+    fontSize: 14,
     color: '#64748B',
-    marginTop: 6,
-    textAlign: 'center'
+    marginTop: 8,
+    textAlign: 'center',
+    letterSpacing: -0.1
   },
   btnGroup: {
     width: '100%',
-    marginBottom: 12
+    marginBottom: 16
   },
   footerNotice: {
-    color: '#475569',
-    fontSize: 11,
+    color: '#94A3B8',
+    fontSize: 12,
     textAlign: 'center',
-    marginTop: 14
+    marginTop: 16,
+    fontWeight: '500'
   }
 });

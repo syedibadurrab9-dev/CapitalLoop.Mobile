@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, ScrollView, View, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, ScrollView, View, TouchableOpacity, ActivityIndicator, Pressable } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../store';
 import { toggleCurrency, triggerApiSync, clearAuth } from '../store/portfolioSlice';
@@ -11,9 +11,9 @@ import { ActionButton } from '../components/ActionButton';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 export default function DashboardScreen({ navigation }: NativeStackScreenProps<any>) {
-  // Explicitly cast to AppDispatch to support async thunk actions smoothly when required
   const dispatch = useDispatch<AppDispatch>();
   const [paywall, setPaywall] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   
   const { 
     assets, 
@@ -38,84 +38,148 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
       return;
     }
     
-    // ✅ FIXED: Enclosed slice-reducer execution safely within the callback
-    dispatch(triggerApiSync());
-    Alert.alert('API Ledger Synced', 'Live balances downloaded via AKD, Binance, and Bank Al Habib APIs.');
+    try {
+      setIsSyncing(true);
+      dispatch(triggerApiSync());
+    } catch (error) {
+      console.error("Data tracking node failure:", error);
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   return (
     <View style={styles.wrapper}>
+      {/* Real-time Streaming Ticker Telemetry Strip */}
       <TickerTapeBar gold={goldPricePKR} silver={silverPricePKR} />
       
-      <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.container} 
+        contentContainerStyle={styles.content} 
+        showsVerticalScrollIndicator={false}
+      >
         
-        {/* Profile Header Block */}
+        {/* ==============================================================================
+            PORTFOLIO USER IDENTITY SECTION
+           ============================================================================== */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.welcome}>Identity Token Verified</Text>
+            <Text style={styles.welcome}>Secure Session Active</Text>
             <Text style={styles.name}>{user.name}</Text>
           </View>
           <TouchableOpacity 
-            style={styles.pill} 
+            style={[
+              styles.pill, 
+              user.isPremiumUser ? styles.pillPro : styles.pillUpgrade
+            ]} 
             onPress={() => !user.isPremiumUser && setPaywall(true)}
             activeOpacity={0.7}
           >
-            <Text style={[styles.pillTxt, { color: user.isPremiumUser ? '#10B981' : '#F59E0B' }]}>
-              {user.isPremiumUser ? 'PRO ACTIVE' : 'UPGRADE'}
+            <View style={[styles.dot, { backgroundColor: user.isPremiumUser ? '#059669' : '#D97706' }]} />
+            <Text style={[styles.pillTxt, { color: user.isPremiumUser ? '#047857' : '#B45309' }]}>
+              {user.isPremiumUser ? 'Premium' : 'Upgrade Plan'}
             </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Aggregate Net Worth Card Frame */}
+        {/* ==============================================================================
+            CONSOLIDATED ASSET EQUITY LEDGER DISPLAY NODE
+           ============================================================================== */}
         <View style={styles.worthCard}>
           <View style={styles.worthRow}>
-            <Text style={styles.worthLabel}>CONSOLIDATED ACCOUNT EQUITY</Text>
-            {/* ✅ FIXED: Wrapped in an arrow function block to satisfy the click return target signature */}
-            <TouchableOpacity style={styles.currPill} onPress={() => dispatch(toggleCurrency())}>
+            <Text style={styles.worthLabel}>Total Net Worth</Text>
+            <TouchableOpacity 
+              style={styles.currPill} 
+              onPress={() => dispatch(toggleCurrency())}
+              activeOpacity={0.7}
+            >
               <Text style={styles.currTxt}>{currencyToggle}</Text>
             </TouchableOpacity>
           </View>
           <Text style={styles.worthValue}>{displayNetWorth()}</Text>
         </View>
 
-        {/* Dynamic Asset Density Matrix Visualizer Chart */}
+        {/* Dynamic Multi-Asset Density Bar Visualizer Matrix */}
         {assets.length > 0 && <PortfolioChart assets={assets} />}
 
-        {/* Navigation Action Management Grid */}
+        {/* ==============================================================================
+            EXECUTIVE CONTROL OPERATIONS WORKSPACE NAVIGATION GRID
+           ============================================================================== */}
+        <Text style={styles.sectionHeader}>Quick Actions</Text>
         <View style={styles.grid}>
-          <TouchableOpacity style={styles.gridCell} onPress={() => navigation.navigate('AssetInput')}>
-            <Text style={styles.cellIcon}>📝</Text>
-            <Text style={styles.cellTxt}>Sync Hub</Text>
-          </TouchableOpacity>
           
-          <TouchableOpacity style={styles.gridCell} onPress={handleSync}>
-            <Text style={styles.cellIcon}>🔄</Text>
-            <Text style={styles.cellTxt}>Auto API Sync</Text>
-          </TouchableOpacity>
+          {/* SYNC HUB */}
+          <Pressable 
+            style={({ pressed }) => [styles.gridCell, pressed && styles.gridCellPressed]} 
+            onPress={() => navigation.navigate('AssetInput')}
+          >
+            <View style={styles.iconCircle}><Text style={styles.cellIcon}>📝</Text></View>
+            <Text style={styles.cellTxt}>Manage Assets</Text>
+          </Pressable>
           
-          <TouchableOpacity style={styles.gridCell} onPress={() => user.isPremiumUser ? navigation.navigate('LiveCharts') : setPaywall(true)}>
-            <Text style={styles.cellIcon}>📈</Text>
-            <Text style={styles.cellTxt}>Live Charts</Text>
-          </TouchableOpacity>
+          {/* AUTO API SYNC */}
+          <Pressable 
+            style={({ pressed }) => [styles.gridCell, (pressed || isSyncing) && styles.gridCellPressed]} 
+            onPress={handleSync}
+            disabled={isSyncing}
+          >
+            <View style={[styles.iconCircle, isSyncing && styles.iconCircleActive]}>
+              {isSyncing ? (
+                <ActivityIndicator size="small" color="#2563EB" />
+              ) : (
+                <Text style={styles.cellIcon}>🔄</Text>
+              )}
+            </View>
+            <Text style={[styles.cellTxt, isSyncing && styles.cellTxtActive]}>
+              {isSyncing ? 'Syncing...' : 'Live Sync'}
+            </Text>
+          </Pressable>
           
-          <TouchableOpacity style={styles.gridCell} onPress={() => navigation.navigate('AiAdvisor')}>
-            <Text style={styles.cellIcon}>🤖</Text>
-            <Text style={styles.cellTxt}>AI Advisor</Text>
-          </TouchableOpacity>
+          {/* LIVE CHARTS */}
+          <Pressable 
+            style={({ pressed }) => [styles.gridCell, pressed && styles.gridCellPressed]} 
+            onPress={() => user.isPremiumUser ? navigation.navigate('LiveCharts') : setPaywall(true)}
+          >
+            <View style={styles.iconCircle}><Text style={styles.cellIcon}>📈</Text></View>
+            <Text style={styles.cellTxt}>Market Analytics</Text>
+          </Pressable>
           
-          <TouchableOpacity style={styles.gridCell} onPress={() => navigation.navigate('KycRoute')}>
-            <Text style={styles.cellIcon}>🆔</Text>
-            <Text style={styles.cellTxt}>KYC Portal</Text>
-          </TouchableOpacity>
+          {/* AI ADVISOR */}
+          <Pressable 
+            style={({ pressed }) => [styles.gridCell, pressed && styles.gridCellPressed]} 
+            onPress={() => navigation.navigate('AiAdvisor')}
+          >
+            <View style={styles.iconCircle}><Text style={styles.cellIcon}>🤖</Text></View>
+            <Text style={styles.cellTxt}>AI Insights</Text>
+          </Pressable>
           
-          <TouchableOpacity style={styles.gridCell} onPress={() => navigation.navigate('LiveChat')}>
-            <Text style={styles.cellIcon}>💬</Text>
-            <Text style={styles.cellTxt}>Support Hub</Text>
-          </TouchableOpacity>
+          {/* KYC PORTAL */}
+          <Pressable 
+            style={({ pressed }) => [styles.gridCell, pressed && styles.gridCellPressed]} 
+            onPress={() => navigation.navigate('KycRoute')}
+          >
+            <View style={styles.iconCircle}><Text style={styles.cellIcon}>🆔</Text></View>
+            <Text style={styles.cellTxt}>Verify Identity</Text>
+          </Pressable>
+          
+          {/* SUPPORT HUB */}
+          <Pressable 
+            style={({ pressed }) => [styles.gridCell, pressed && styles.gridCellPressed]} 
+            onPress={() => navigation.navigate('LiveChat')}
+          >
+            <View style={styles.iconCircle}><Text style={styles.cellIcon}>💬</Text></View>
+            <Text style={styles.cellTxt}>Help & Support</Text>
+          </Pressable>
         </View>
 
-        {/* Detailed Item Ledger Cards Track */}
-        <Text style={styles.listHeader}>Portfolio Dynamic Ledger</Text>
+        {/* ==============================================================================
+            DYNAMIC STREAM ITEMIZED POSITIONS TRACK
+           ============================================================================== */}
+        <View style={styles.listHeaderRow}>
+          <Text style={styles.listHeader}>Your Asset Distribution</Text>
+          <Text style={styles.listCount}>{assets.length} Active</Text>
+        </View>
+
         {assets.map((asset) => (
           <AssetSummaryCard
             key={asset.id}
@@ -124,16 +188,15 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
             isAutoSynced={asset.isAutoSynced}
             valueDisplay={
               currencyToggle === 'PKR' 
-                ? `Rs ${asset.holdingValuePKR.toLocaleString()}` 
+                ? `Rs. ${asset.holdingValuePKR.toLocaleString()}` 
                 : `$ ${(asset.holdingValuePKR / pkrToUsdRate).toLocaleString(undefined, { maximumFractionDigits: 0 })}`
             }
           />
         ))}
 
-        {/* Safe Session Disconnection Controller */}
+        {/* Session Disconnection Lifecycle Controller */}
         <View style={styles.spacing}>
-          {/* ✅ FIXED: Bound dispatch directly inside an anonymous wrapper to safely match void expectations */}
-          <ActionButton title="Disconnect Enterprise Session" onPress={() => { dispatch(clearAuth()); }} variant="danger" />
+          <ActionButton title="Log Out of Enterprise Session" onPress={() => { dispatch(clearAuth()); }} variant="danger" />
         </View>
         
         <PaywallModal visible={paywall} onClose={() => setPaywall(false)} />
@@ -143,24 +206,193 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
 }
 
 const styles = StyleSheet.create({
-  wrapper: { flex: 1, backgroundColor: '#0F172A' },
-  container: { flex: 1 },
-  content: { padding: 20 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
-  welcome: { fontSize: 11, color: '#64748B', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
-  name: { fontSize: 22, fontWeight: '800', color: '#FFFFFF', marginTop: 2 },
-  pill: { backgroundColor: '#1E293B', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: '#334155' },
-  pillTxt: { fontSize: 11, fontWeight: '800' },
-  worthCard: { backgroundColor: '#1E293B', padding: 22, borderRadius: 20, borderWidth: 1, borderColor: '#334155', marginBottom: 10 },
-  worthRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  worthLabel: { fontSize: 11, color: '#94A3B8', fontWeight: '700', letterSpacing: 0.5 },
-  currPill: { backgroundColor: '#334155', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },
-  currTxt: { color: '#FFFFFF', fontSize: 11, fontWeight: '800' },
-  worthValue: { fontSize: 32, fontWeight: '800', color: '#FFFFFF', marginTop: 12, letterSpacing: -0.5 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 16, marginTop: 8 },
-  gridCell: { width: '31%', backgroundColor: '#1E293B', padding: 16, borderRadius: 16, alignItems: 'center', marginBottom: 12, borderWidth: 1, borderColor: '#334155' },
-  cellIcon: { fontSize: 22, marginBottom: 6 },
-  cellTxt: { color: '#F8FAFC', fontSize: 11, fontWeight: '700', textAlign: 'center' },
-  listHeader: { fontSize: 12, fontWeight: '800', color: '#94A3B8', textTransform: 'uppercase', marginBottom: 14, letterSpacing: 0.75 },
-  spacing: { marginTop: 20 }
+  wrapper: { 
+    flex: 1, 
+    backgroundColor: '#F1F5F9' /* Clean frosted ice sheet canvas background */
+  },
+  container: { 
+    flex: 1 
+  },
+  content: { 
+    paddingHorizontal: 20, 
+    paddingTop: 24, 
+    paddingBottom: 40 
+  },
+  header: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    marginBottom: 28 
+  },
+  welcome: { 
+    fontSize: 12, 
+    color: '#64748B', 
+    fontWeight: '600', 
+    letterSpacing: 0.1
+  },
+  name: { 
+    fontSize: 26, 
+    fontWeight: '800', 
+    color: '#0F172A', /* Deep ink-slate primary color scales */
+    marginTop: 3, 
+    letterSpacing: -0.5 
+  },
+  pill: { 
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14, 
+    paddingVertical: 7, 
+    borderRadius: 20, 
+    borderWidth: 1, 
+    gap: 6
+  },
+  pillPro: {
+    backgroundColor: '#E6F4EA', 
+    borderColor: '#A7F3D0'
+  },
+  pillUpgrade: {
+    backgroundColor: '#FFFBEB', 
+    borderColor: '#FDE68A'
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3
+  },
+  pillTxt: { 
+    fontSize: 11, 
+    fontWeight: '700'
+  },
+  worthCard: { 
+    backgroundColor: '#FFFFFF', 
+    padding: 26, 
+    borderRadius: 24, 
+    borderWidth: 1, 
+    borderColor: '#E2E8F0', 
+    marginBottom: 28,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.05,
+    shadowRadius: 16,
+    elevation: 3
+  },
+  worthRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center' 
+  },
+  worthLabel: { 
+    fontSize: 12, 
+    color: '#475569', 
+    fontWeight: '600'
+  },
+  currPill: { 
+    backgroundColor: '#F8FAFC', 
+    paddingHorizontal: 12, 
+    paddingVertical: 6, 
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0'
+  },
+  currTxt: { 
+    color: '#2563EB', /* Bold institutional tech sapphire blue */
+    fontSize: 11, 
+    fontWeight: '800',
+    letterSpacing: 0.5
+  },
+  worthValue: { 
+    fontSize: 36, 
+    fontWeight: '800', 
+    color: '#0F172A', 
+    marginTop: 14, 
+    letterSpacing: -0.5,
+    fontVariant: ['tabular-nums']
+  },
+  sectionHeader: {
+    fontSize: 15, 
+    fontWeight: '700', 
+    color: '#334155', 
+    marginBottom: 16, 
+    letterSpacing: -0.2
+  },
+  grid: { 
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    justifyContent: 'space-between', 
+    marginBottom: 20 
+  },
+  gridCell: { 
+    width: '48%', 
+    backgroundColor: '#FFFFFF', 
+    paddingVertical: 22,
+    paddingHorizontal: 16, 
+    borderRadius: 24, 
+    alignItems: 'center', 
+    marginBottom: 14, 
+    borderWidth: 1, 
+    borderColor: '#E2E8F0',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2
+  },
+  gridCellPressed: {
+    backgroundColor: '#F8FAFC',
+    borderColor: '#CBD5E1'
+  },
+  iconCircle: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: '#F8FAFC',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0'
+  },
+  iconCircleActive: {
+    borderColor: '#2563EB',
+    backgroundColor: '#EFF6FF'
+  },
+  cellIcon: { 
+    fontSize: 18 
+  },
+  cellTxt: { 
+    color: '#334155', 
+    fontSize: 12, 
+    fontWeight: '600', 
+    textAlign: 'center' 
+  },
+  cellTxtActive: {
+    color: '#2563EB'
+  },
+  listHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+    marginTop: 12
+  },
+  listHeader: { 
+    fontSize: 15, 
+    fontWeight: '700', 
+    color: '#334155', 
+    letterSpacing: -0.2
+  },
+  listCount: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#2563EB',
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#DBEAFE'
+  },
+  spacing: { 
+    marginTop: 16 
+  }
 });

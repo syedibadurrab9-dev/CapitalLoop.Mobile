@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, ScrollView, View, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { CameraView } from 'expo-camera'; 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -61,24 +61,24 @@ export default function AssetInputScreen({ navigation }: NativeStackScreenProps<
         throw new Error();
       }
     } catch {
-      Alert.alert('Scan Matrix Error', 'Unable to parse structural credential formats from decrypted QR stream.');
+      Alert.alert('Scan Error', 'Could not read API keys from the QR code pattern.');
     }
   };
 
   const triggerBinanceCoreSync = (apiKey: string, secretKey: string) => {
     if (!apiKey || !secretKey) {
-      Alert.alert('Input Parameters Void', 'Please configure explicit API strings prior to initializing sync tracks.');
+      Alert.alert('Missing Keys', 'Please provide or scan your API keys before syncing.');
       return;
     }
 
     dispatch(linkBinanceWallet({ apiKey, secretKey }))
       .unwrap()
       .then(() => {
-        Alert.alert('Integration Finalized', 'Exchanges balance vectors auto-hydrated safely into local PKR metrics.');
+        Alert.alert('Sync Complete', 'Exchange balances successfully added to your net worth.');
         navigation.goBack();
       })
       .catch((backendErr) => {
-        Alert.alert('Handshake Faulted', backendErr);
+        Alert.alert('Sync Failed', backendErr);
       });
   };
 
@@ -89,7 +89,7 @@ export default function AssetInputScreen({ navigation }: NativeStackScreenProps<
         if (granted) {
           dispatch(setScannerState(true));
         } else {
-          Alert.alert('Hardware Restriction', 'Please toggle camera privacy permissions manually inside mobile hardware config.');
+          Alert.alert('Camera Access Required', 'Please enable camera access permissions in your mobile system settings.');
         }
       });
   };
@@ -97,7 +97,7 @@ export default function AssetInputScreen({ navigation }: NativeStackScreenProps<
   const handleManualSave = () => {
     const numeric = parseFloat(valStr);
     if (!name || isNaN(numeric) || numeric <= 0) {
-      Alert.alert('Validation Rejection', 'Please enter valid allocation parameters.');
+      Alert.alert('Validation Error', 'Please enter a valid position name and evaluation amount.');
       return;
     }
     
@@ -111,7 +111,7 @@ export default function AssetInputScreen({ navigation }: NativeStackScreenProps<
       totalInstallments: cat === 'Real_Estate' ? parseInt(totalIns) || 0 : undefined
     }));
     
-    Alert.alert('Position Logged', 'Manual asset node pinned to tracking runtime successfully.');
+    Alert.alert('Asset Added', 'Manual entry successfully pinned to your dynamic ledger.');
     navigation.goBack();
   };
 
@@ -124,9 +124,9 @@ export default function AssetInputScreen({ navigation }: NativeStackScreenProps<
         barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
       >
         <View style={styles.scannerOverlayContainer}>
-          <Text style={styles.scannerPromptTxt}>Align desktop API Management QR inside box frame</Text>
+          <Text style={styles.scannerPromptTxt}>Align your desktop API QR code inside the camera frame</Text>
           <TouchableOpacity style={styles.closeScannerBtn} onPress={() => dispatch(setScannerState(false))}>
-            <Text style={styles.closeScannerBtnTxt}>Abort Scanner Hardware</Text>
+            <Text style={styles.closeScannerBtnTxt}>Cancel Scan</Text>
           </TouchableOpacity>
         </View>
       </CameraView>
@@ -135,8 +135,8 @@ export default function AssetInputScreen({ navigation }: NativeStackScreenProps<
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-      <Text style={styles.title}>Asset Ingestion Control</Text>
-      <Text style={styles.sub}>Select synchronization method vector to lock down distributed capital items.</Text>
+      <Text style={styles.title}>Add Asset</Text>
+      <Text style={styles.sub}>Choose a tracking method to securely log your capital holdings.</Text>
 
       {/* Mode Operational Segmentation Toggle Switches */}
       <View style={styles.segmentControlTrack}>
@@ -165,10 +165,10 @@ export default function AssetInputScreen({ navigation }: NativeStackScreenProps<
 
       {entryMode === 'Manual' ? (
         <View>
-          <CustomInput label="Asset Position Title" value={name} onChangeText={setName} placeholder="e.g., DHA Phase 9 File / Silver Vault" />
-          <CustomInput label="Current Evaluation Principal (PKR)" value={valStr} onChangeText={setValStr} placeholder="e.g., 2000000" keyboardType="numeric" />
+          <CustomInput label="Asset Name" value={name} onChangeText={setName} placeholder="e.g., Physical Silver Vault / DHA File" />
+          <CustomInput label="Current Value (PKR)" value={valStr} onChangeText={setValStr} placeholder="e.g., 2000000" keyboardType="numeric" />
           
-          <Text style={styles.label}>Classification Category</Text>
+          <Text style={styles.label}>Asset Type</Text>
           <View style={styles.row}>
             {(['PSX_Equity', 'Crypto', 'Mutual_Fund', 'Real_Estate'] as const).map((t) => (
               <TouchableOpacity key={t} style={[styles.chip, cat === t && styles.activeChip]} onPress={() => setCat(t)}>
@@ -179,40 +179,40 @@ export default function AssetInputScreen({ navigation }: NativeStackScreenProps<
 
           {cat === 'Real_Estate' && (
             <View style={styles.reBlock}>
-              <Text style={styles.reTitle}>Housing Society Installment Telemetry</Text>
+              <Text style={styles.reTitle}>Installment Plan Progress</Text>
               <View style={styles.reRow}>
                 <View style={{ flex: 0.47 }}><CustomInput label="Installments Paid" value={paidIns} onChangeText={setPaidIns} placeholder="3" keyboardType="numeric" /></View>
-                <View style={{ flex: 0.47 }}><CustomInput label="Total Contract Matrix" value={totalIns} onChangeText={setTotalIns} placeholder="12" keyboardType="numeric" /></View>
+                <View style={{ flex: 0.47 }}><CustomInput label="Total Installments" value={totalIns} onChangeText={setTotalIns} placeholder="12" keyboardType="numeric" /></View>
               </View>
             </View>
           )}
 
-          <ActionButton title="Synchronize Portfolio Allocation" onPress={handleManualSave} variant="accent" />
+          <ActionButton title="Save Position to Portfolio" onPress={handleManualSave} variant="primary" />
         </View>
       ) : (
         <View style={styles.autoBlock}>
-          <Text style={styles.autoBlockHeaderTitle}>Binance Brokerage Live Integration Layer</Text>
+          <Text style={styles.autoBlockHeaderTitle}>Binance Exchange Integration</Text>
           <Text style={styles.autoBlockDescriptionSub}>
-            Authorizes CapitalLoop downstream endpoints to fetch Spot positions, Staking Earn yields, and Futures allocations securely. Keep your account safe by ensuring your keys use Read-Only access permissions.
+            Securely link your Spot portfolio, Staking fields, and asset holdings. For optimal security, ensure your generated API keys use Read-Only access profiles.
           </Text>
 
-          <TouchableOpacity style={styles.cameraTriggerWidgetBtn} onPress={initializeHardwareScanner}>
-            <Text style={styles.cameraTriggerWidgetBtnTxt}>📷 Open Hardware Scanner & Parse Desktop QR</Text>
+          <TouchableOpacity style={styles.cameraTriggerWidgetBtn} onPress={initializeHardwareScanner} activeOpacity={0.8}>
+            <Text style={styles.cameraTriggerWidgetBtnTxt}>📷 Scan Desktop Account QR Code</Text>
           </TouchableOpacity>
 
-          <Text style={styles.inlineComponentSplitDivider}>— OR MANUAL INJECTION TRACK —</Text>
+          <Text style={styles.inlineComponentSplitDivider}>— OR ENTER MANUALLY —</Text>
 
-          <CustomInput label="Binance Rest-Api Token (Key)" value={exchangeApiKey} onChangeText={setExchangeApiKey} placeholder="Paste long hexadecimal API key string" />
-          <CustomInput label="Binance Cryptographic Signed Security Signature (Secret)" value={exchangeSecretKey} onChangeText={setExchangeSecretKey} placeholder="Paste long secret hash string" secureTextEntry={true} />
+          <CustomInput label="Binance Read-Only API Key" value={exchangeApiKey} onChangeText={setExchangeApiKey} placeholder="Paste long API key string" />
+          <CustomInput label="Binance Secret Key" value={exchangeSecretKey} onChangeText={setExchangeSecretKey} placeholder="Paste your secret hash string" secureTextEntry={true} />
 
           <ActionButton 
-            title={isLoading ? "Interrogating Node Pipelines..." : "Establish Cryptographic Brokerage Handshake"} 
+            title={isLoading ? "Connecting Secure Node..." : "Link API Account"} 
             onPress={() => triggerBinanceCoreSync(exchangeApiKey, exchangeSecretKey)} 
-            variant="accent" 
+            variant="primary" 
             disabled={isLoading}
           />
 
-          {isLoading && <ActivityIndicator style={{ marginTop: 20 }} size="small" color="#6366F1" />}
+          {isLoading && <ActivityIndicator style={{ marginTop: 20 }} size="small" color="#2563EB" />}
         </View>
       )}
     </ScrollView>
@@ -220,41 +220,223 @@ export default function AssetInputScreen({ navigation }: NativeStackScreenProps<
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0F172A' },
-  content: { padding: 20 },
-  title: { fontSize: 22, fontWeight: '800', color: '#FFFFFF', marginBottom: 4 },
-  sub: { fontSize: 13, color: '#64748B', marginBottom: 24 },
-  segmentControlTrack: { flexDirection: 'row', backgroundColor: '#1E293B', padding: 4, borderRadius: 12, marginBottom: 24, borderWidth: 1, borderColor: '#334155' },
-  segmentBtn: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 8 },
-  activeSegmentBtn: { 
-    backgroundColor: '#0F172A', 
-    elevation: 2, 
-    shadowColor: '#000', 
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41
+  container: { 
+    flex: 1, 
+    backgroundColor: '#F1F5F9' /* Premium soft light grey slate base */
   },
-  segmentTxt: { color: '#64748B', fontSize: 13, fontWeight: '700' },
-  activeSegmentTxt: { color: '#38BDF8' },
-  errorBanner: { backgroundColor: '#7F1D1D', padding: 12, borderRadius: 10, borderWidth: 1, borderColor: '#F87171', marginBottom: 16 },
-  errorBannerTxt: { color: '#FCA5A5', fontSize: 12, fontWeight: '600' },
-  label: { fontSize: 11, color: '#94A3B8', fontWeight: '700', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 },
-  row: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 20 },
-  chip: { width: '48%', backgroundColor: '#1E293B', paddingVertical: 14, borderRadius: 12, alignItems: 'center', marginBottom: 12, borderWidth: 1, borderColor: '#334155' },
-  activeChip: { backgroundColor: '#6366F1', borderColor: '#6366F1' },
-  chipTxt: { color: '#94A3B8', fontSize: 12, fontWeight: '700' },
-  activeChipTxt: { color: '#FFFFFF' },
-  reBlock: { backgroundColor: '#1E293B', padding: 16, borderRadius: 16, borderWidth: 1, borderColor: '#334155', marginBottom: 24 },
-  reTitle: { color: '#FFFFFF', fontSize: 13, fontWeight: '700', marginBottom: 14 },
-  reRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  autoBlock: { backgroundColor: '#1E293B', padding: 20, borderRadius: 16, borderWidth: 1, borderColor: '#334155', marginBottom: 12 },
-  autoBlockHeaderTitle: { color: '#FFFFFF', fontSize: 15, fontWeight: '800', marginBottom: 6 },
-  autoBlockDescriptionSub: { color: '#64748B', fontSize: 12, lineHeight: 18, marginBottom: 20 },
-  cameraTriggerWidgetBtn: { backgroundColor: '#F3BA2F', padding: 16, borderRadius: 12, alignItems: 'center', marginVertical: 8 },
-  cameraTriggerWidgetBtnTxt: { color: '#0F172A', fontWeight: '800', fontSize: 13, letterSpacing: 0.25 },
-  inlineComponentSplitDivider: { textAlign: 'center', color: '#475569', fontSize: 10, fontWeight: '700', marginVertical: 18, letterSpacing: 1 },
-  scannerOverlayContainer: { flex: 1, justifyContent: 'space-between', alignItems: 'center', paddingVertical: 120 },
-  scannerPromptTxt: { color: '#FFFFFF', backgroundColor: 'rgba(15, 23, 42, 0.85)', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20, fontSize: 12, fontWeight: '700', overflow: 'hidden', textAlign: 'center' },
-  closeScannerBtn: { backgroundColor: '#EF4444', paddingHorizontal: 20, paddingVertical: 14, borderRadius: 12, shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 4, elevation: 4 },
-  closeScannerBtnTxt: { color: '#FFFFFF', fontWeight: '700', fontSize: 13 },
+  content: { 
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 40
+  },
+  title: { 
+    fontSize: 26, 
+    fontWeight: '800', 
+    color: '#0F172A', /* Saturated deep ink slate typography */
+    marginBottom: 4,
+    letterSpacing: -0.5
+  },
+  sub: { 
+    fontSize: 13, 
+    color: '#64748B', 
+    marginBottom: 24,
+    lineHeight: 20
+  },
+  segmentControlTrack: { 
+    flexDirection: 'row', 
+    backgroundColor: '#E2E8F0', 
+    padding: 4, 
+    borderRadius: 14, 
+    marginBottom: 24, 
+    borderWidth: 1, 
+    borderColor: '#CBD5E1' 
+  },
+  segmentBtn: { 
+    flex: 1, 
+    paddingVertical: 10, 
+    alignItems: 'center', 
+    borderRadius: 10 
+  },
+  activeSegmentBtn: { 
+    backgroundColor: '#FFFFFF', /* Frosted selector highlight */
+    shadowColor: '#0F172A', 
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2
+  },
+  segmentTxt: { 
+    color: '#64748B', 
+    fontSize: 13, 
+    fontWeight: '700' 
+  },
+  activeSegmentTxt: { 
+    color: '#2563EB' /* Active brand blue color highlight */
+  },
+  errorBanner: { 
+    backgroundColor: '#FEF2F2', 
+    padding: 14, 
+    borderRadius: 14, 
+    borderWidth: 1, 
+    borderColor: '#FEE2E2', 
+    marginBottom: 16 
+  },
+  errorBannerTxt: { 
+    color: '#DC2626', 
+    fontSize: 13, 
+    fontWeight: '600' 
+  },
+  label: { 
+    fontSize: 13, 
+    color: '#334155', 
+    fontWeight: '600', 
+    marginBottom: 10,
+    letterSpacing: -0.1
+  },
+  row: { 
+    flexDirection: 'row', 
+    flexWrap: 'wrap', 
+    justifyContent: 'space-between', 
+    marginBottom: 16 
+  },
+  chip: { 
+    width: '48%', 
+    backgroundColor: '#FFFFFF', 
+    paddingVertical: 14, 
+    borderRadius: 14, 
+    alignItems: 'center', 
+    marginBottom: 12, 
+    borderWidth: 1, 
+    borderColor: '#E2E8F0',
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.01,
+    shadowRadius: 2,
+    elevation: 1
+  },
+  activeChip: { 
+    backgroundColor: '#EFF6FF', 
+    borderColor: '#BFDBFE' 
+  },
+  chipTxt: { 
+    color: '#475569', 
+    fontSize: 13, 
+    fontWeight: '600' 
+  },
+  activeChipTxt: { 
+    color: '#2563EB',
+    fontWeight: '700' 
+  },
+  reBlock: { 
+    backgroundColor: '#FFFFFF', 
+    padding: 20, 
+    borderRadius: 24, 
+    borderWidth: 1, 
+    borderColor: '#E2E8F0', 
+    marginBottom: 24,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.02,
+    shadowRadius: 8,
+    elevation: 1
+  },
+  reTitle: { 
+    color: '#334155', 
+    fontSize: 14, 
+    fontWeight: '700', 
+    marginBottom: 16,
+    letterSpacing: -0.1
+  },
+  reRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between' 
+  },
+  autoBlock: { 
+    backgroundColor: '#FFFFFF', 
+    padding: 24, 
+    borderRadius: 24, 
+    borderWidth: 1, 
+    borderColor: '#E2E8F0', 
+    marginBottom: 12,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.02,
+    shadowRadius: 8,
+    elevation: 1
+  },
+  autoBlockHeaderTitle: { 
+    color: '#0F172A', 
+    fontSize: 16, 
+    fontWeight: '700', 
+    marginBottom: 6,
+    letterSpacing: -0.2
+  },
+  autoBlockDescriptionSub: { 
+    color: '#64748B', 
+    fontSize: 13, 
+    lineHeight: 18, 
+    marginBottom: 20 
+  },
+  cameraTriggerWidgetBtn: { 
+    backgroundColor: '#2563EB', /* Clean brand signature sapphire */
+    // 🚀 FIXED: Changed 'paddingScale' to 'paddingHorizontal' to clear type mismatch error
+    paddingHorizontal: 16, 
+    paddingVertical: 14,
+    borderRadius: 14, 
+    alignItems: 'center', 
+    marginVertical: 8,
+    shadowColor: '#2563EB',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 2
+  },
+  cameraTriggerWidgetBtnTxt: { 
+    color: '#FFFFFF', 
+    fontWeight: '700', 
+    fontSize: 13 
+  },
+  inlineComponentSplitDivider: { 
+    textAlign: 'center', 
+    color: '#94A3B8', 
+    fontSize: 11, 
+    fontWeight: '700', 
+    marginVertical: 20, 
+    letterSpacing: 0.5 
+  },
+  scannerOverlayContainer: { 
+    flex: 1, 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    paddingVertical: 120 
+  },
+  scannerPromptTxt: { 
+    color: '#0F172A', 
+    backgroundColor: 'rgba(255, 255, 255, 0.92)', /* Soft frosted overlay prompt box */
+    paddingHorizontal: 20, 
+    paddingVertical: 12, 
+    borderRadius: 24, 
+    fontSize: 13, 
+    fontWeight: '600', 
+    textAlign: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5
+  },
+  closeScannerBtn: { 
+    backgroundColor: '#DC2626', 
+    paddingHorizontal: 24, 
+    paddingVertical: 14, 
+    borderRadius: 14, 
+    shadowColor: '#000', 
+    shadowOpacity: 0.2, 
+    shadowRadius: 6, 
+    elevation: 4 
+  },
+  closeScannerBtnTxt: { 
+    color: '#FFFFFF', 
+    fontWeight: '700', 
+    fontSize: 13 
+  },
 });

@@ -3,6 +3,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 
+// 🚀 Expo status bar layer integrated cleanly
+import { StatusBar } from 'expo-status-bar';
+
 // Screen Imports
 import AuthScreen from '../screens/AuthScreen';
 import DashboardScreen from '../screens/DashboardScreen';
@@ -12,7 +15,7 @@ import AiAdvisorScreen from '../screens/AiAdvisorScreen';
 import KycScreen from '../screens/KycScreen';
 import LiveChatScreen from '../screens/LiveChatScreen';
 
-// 1. Declare explicit type bindings for navigation param mapping
+// Declare explicit type bindings for navigation param mapping
 export type RootStackParamList = {
   Auth: undefined;
   Dashboard: undefined;
@@ -23,66 +26,69 @@ export type RootStackParamList = {
   LiveChat: undefined;
 };
 
-// 2. Instantiate the typed Navigator engine instance
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
-  // Pull your native authentication state cleanly from your domain slice map
   const isAuthenticated = useSelector((state: RootState) => state.portfolio.user.isAuthenticated);
 
   return (
-    // ✅ FIXED: NavigationContainer wrapper completely removed here to prevent duplicate root collisions
-    <Stack.Navigator 
-      screenOptions={{ 
-        headerStyle: { backgroundColor: '#1E293B' }, 
-        headerTintColor: '#FFFFFF', 
-        headerShadowVisible: false,
-        headerTitleStyle: { fontWeight: '700', fontSize: 16 },
-        animation: 'slide_from_right' // Gives your flows a smooth native operational feel
-      }}
-    >
-      {!isAuthenticated ? (
-        // Unauthenticated Flow
-        <Stack.Screen 
-          name="Auth" 
-          component={AuthScreen} 
-          options={{ headerShown: false }} 
-        />
-      ) : (
-        // Authenticated Secured Ledger Stack Nodes
-        <>
+    <>
+      {/* Dynamic light theme system bar tracking layer */}
+      <StatusBar style="dark" animated={true} />
+
+      <Stack.Navigator 
+        screenOptions={{ 
+          headerStyle: { backgroundColor: '#FFFFFF' },
+          headerTintColor: '#0F172A',
+          headerShadowVisible: true,
+          // 🚀 FIXED: Stripped of letterSpacing property fields to comply with Pick<TextStyle> navigation typings
+          headerTitleStyle: { fontWeight: '700', fontSize: 16 },
+          animation: 'slide_from_right'
+        }}
+      >
+        {!isAuthenticated ? (
+          // Unauthenticated Flow
           <Stack.Screen 
-            name="Dashboard" 
-            component={DashboardScreen} 
-            options={{ title: 'CapitalLoop Ledger' }} 
+            name="Auth" 
+            component={AuthScreen} 
+            options={{ headerShown: false }} 
           />
-          <Stack.Screen 
-            name="AssetInput" 
-            component={AssetInputScreen} 
-            options={{ title: 'Sync Hub' }} // Aligned with your dashboard grid button
-          />
-          <Stack.Screen 
-            name="LiveCharts" 
-            component={LiveChartsScreen} 
-            options={{ title: 'Live Streaming Market Feeds' }} 
-          />
-          <Stack.Screen 
-            name="AiAdvisor" 
-            component={AiAdvisorScreen} 
-            options={{ title: 'AI Wealth Advisor' }} 
-          />
-          <Stack.Screen 
-            name="KycRoute" 
-            component={KycScreen} 
-            options={{ title: 'Compliance Verification' }} 
-          />
-          <Stack.Screen 
-            name="LiveChat" 
-            component={LiveChatScreen} 
-            options={{ title: 'Priority Support Desk' }} 
-          />
-        </>
-      )}
-    </Stack.Navigator>
+        ) : (
+          // Authenticated Secured Ledger Stack Nodes
+          <>
+            <Stack.Screen 
+              name="Dashboard" 
+              component={DashboardScreen} 
+              options={{ title: 'CapitalLoop' }} 
+            />
+            <Stack.Screen 
+              name="AssetInput" 
+              component={AssetInputScreen} 
+              options={{ title: 'Manage Assets' }} 
+            />
+            <Stack.Screen 
+              name="LiveCharts" 
+              component={LiveChartsScreen} 
+              options={{ title: 'Market Analytics' }} 
+            />
+            <Stack.Screen 
+              name="AiAdvisor" 
+              component={AiAdvisorScreen} 
+              options={{ title: 'AI Insights' }} 
+            />
+            <Stack.Screen 
+              name="KycRoute" 
+              component={KycScreen} 
+              options={{ title: 'Verify Identity' }} 
+            />
+            <Stack.Screen 
+              name="LiveChat" 
+              component={LiveChatScreen} 
+              options={{ title: 'Help & Support' }} 
+            />
+          </>
+        )}
+      </Stack.Navigator>
+    </>
   );
 }

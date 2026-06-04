@@ -16,10 +16,10 @@ export default function AiAdvisorScreen() {
   
   // Local UI state hooks
   const [capPercentage, setCapPercentage] = useState<number>(30);
-  const [displayPercentage, setDisplayPercentage] = useState<number>(30); // ✅ FIXED: Prevents UI stuttering during active drags
+  const [displayPercentage, setDisplayPercentage] = useState<number>(30);
   const [paywall, setPaywall] = useState<boolean>(false);
 
-  // Dispatches network payload requests over our secure .NET pipeline
+  // Dispatches network payload requests over our secure backend pipeline
   const executeEngineAudit = (targetCap: number) => {
     if (!isPremium) {
       setPaywall(true);
@@ -30,7 +30,6 @@ export default function AiAdvisorScreen() {
 
   // Run automated baseline verification cleanly when screen finishes mounting
   useEffect(() => {
-    // ✅ FIXED: Quiet verification block ensures non-premium profiles aren't hit with an instant paywall modal on mount
     if (isPremium) {
       executeEngineAudit(30);
     }
@@ -48,15 +47,15 @@ export default function AiAdvisorScreen() {
       contentContainerStyle={styles.content} 
       showsVerticalScrollIndicator={false}
     >
-      <Text style={styles.title}>AI Strategic Risk Engine</Text>
+      <Text style={styles.title}>AI Risk Insights</Text>
       <Text style={styles.sub}>
-        Configure dynamic sector safety boundaries to run automated rebalancing audits across your integrated holdings.
+        Set your preferred exposure safety boundaries to run automated security audits across your integrated investment holdings.
       </Text>
 
       {/* Structural Risk Selection Form Component */}
       <View style={styles.sliderCard}>
         <View style={styles.sliderLabelRow}>
-          <Text style={styles.sliderLabel}>Max Allowed Sector Concentration</Text>
+          <Text style={styles.sliderLabel}>Maximum Sector Limit</Text>
           <Text style={styles.sliderValue}>{displayPercentage}%</Text>
         </View>
         
@@ -66,18 +65,18 @@ export default function AiAdvisorScreen() {
           maximumValue={90}
           step={5}
           value={capPercentage}
-          onValueChange={setDisplayPercentage} // ✅ FIXED: Updates local number text instantly without forcing full screen repaints
-          onSlidingComplete={handleSlidingComplete} // ✅ FIXED: Hits the backend endpoint only when the user releases the slider thumb
-          minimumTrackTintColor="#38BDF8" 
-          maximumTrackTintColor="#334155"
-          thumbTintColor="#38BDF8"
+          onValueChange={setDisplayPercentage}
+          onSlidingComplete={handleSlidingComplete}
+          minimumTrackTintColor="#2563EB" /* Aligned to premium corporate sapphire blue */
+          maximumTrackTintColor="#E2E8F0" /* Clean light track background tint */
+          thumbTintColor="#2563EB"
         />
       </View>
 
       <ActionButton 
-        title={isLoading ? "Processing Auditing Tracks..." : "Trigger Risk Engine Evaluation"} 
+        title={isLoading ? "Analyzing Portfolio Allocation..." : "Run Allocation Analysis"} 
         onPress={() => executeEngineAudit(capPercentage)} 
-        variant="accent"
+        variant="primary" /* Drops seamlessly into our master ink-slate style action block */
         disabled={isLoading}
       />
 
@@ -91,7 +90,7 @@ export default function AiAdvisorScreen() {
       {/* Dynamic API Response Logging Matrices Output */}
       {isLoading ? (
         <View style={styles.loaderContainer}>
-          <ActivityIndicator size="large" color="#38BDF8" />
+          <ActivityIndicator size="large" color="#2563EB" />
         </View>
       ) : (
         riskAudit && (
@@ -107,7 +106,7 @@ export default function AiAdvisorScreen() {
                 styles.badgeText, 
                 riskAudit.safetyBreached ? styles.breachedBadgeText : styles.compliantBadgeText
               ]}>
-                {riskAudit.safetyBreached ? '⚠️ ALIGNMENT BREACH' : '✅ FRAMEWORK SECURE'}
+                {riskAudit.safetyBreached ? '⚠️ Target Limit Exceeded' : '✅ Portfolio Balanced'}
               </Text>
             </View>
 
@@ -132,42 +131,144 @@ export default function AiAdvisorScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0F172A' },
-  content: { padding: 20 },
-  title: { fontSize: 22, fontWeight: '800', color: '#FFFFFF', marginBottom: 4 },
-  sub: { fontSize: 13, color: '#64748B', marginBottom: 24, lineHeight: 18 },
+  container: { 
+    flex: 1, 
+    backgroundColor: '#F1F5F9' /* Clean frosted slate canvas background */
+  },
+  content: { 
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 40
+  },
+  title: { 
+    fontSize: 26, 
+    fontWeight: '800', 
+    color: '#0F172A', /* Deep elegant ink-slate primary color */
+    marginBottom: 4,
+    letterSpacing: -0.5
+  },
+  sub: { 
+    fontSize: 13, 
+    color: '#64748B', 
+    marginBottom: 24, 
+    lineHeight: 20,
+    letterSpacing: -0.1
+  },
   sliderCard: { 
-    backgroundColor: '#1E293B', 
-    padding: 20, 
-    borderRadius: 16, 
+    backgroundColor: '#FFFFFF', /* Pristine crisp paper white */
+    padding: 24, 
+    borderRadius: 24, 
     borderWidth: 1, 
-    borderColor: '#334155', 
-    marginBottom: 20 
+    borderColor: '#E2E8F0', 
+    marginBottom: 20,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    elevation: 2
   },
-  sliderLabelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  sliderLabel: { fontSize: 11, color: '#94A3B8', fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.75 },
-  sliderValue: { fontSize: 20, fontWeight: '800', color: '#38BDF8' },
-  sliderWidget: { width: '100%', height: 40 },
-  loaderContainer: { marginTop: 40, alignItems: 'center' },
-  errorBox: { backgroundColor: '#7F1D1D', padding: 14, borderRadius: 12, marginTop: 16, borderWidth: 1, borderColor: '#F87171' },
-  errorTxt: { color: '#FCA5A5', fontSize: 13, fontWeight: '600' },
-  auditResultBox: { 
-    backgroundColor: '#1E293B', 
-    padding: 20, 
+  sliderLabelRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    marginBottom: 14 
+  },
+  sliderLabel: { 
+    fontSize: 13, 
+    color: '#334155', 
+    fontWeight: '600',
+    letterSpacing: -0.1
+  },
+  sliderValue: { 
+    fontSize: 22, 
+    fontWeight: '800', 
+    color: '#2563EB',
+    fontVariant: ['tabular-nums']
+  },
+  sliderWidget: { 
+    width: '100%', 
+    height: 40 
+  },
+  loaderContainer: { 
+    marginTop: 40, 
+    alignItems: 'center' 
+  },
+  errorBox: { 
+    backgroundColor: '#FEF2F2', 
+    padding: 16, 
     borderRadius: 16, 
-    marginTop: 24, 
-    borderWidth: 1.5 
+    marginTop: 16, 
+    borderWidth: 1, 
+    borderColor: '#FEE2E2' 
   },
-  compliantBorder: { borderColor: '#10B981' },
-  breachedBorder: { borderColor: '#EF4444' },
-  statusBadge: { alignSelf: 'flex-start', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, marginBottom: 16 },
-  compliantBadge: { backgroundColor: 'rgba(16, 185, 129, 0.15)' },
-  breachedBadge: { backgroundColor: 'rgba(239, 68, 68, 0.15)' },
-  badgeText: { fontSize: 11, fontWeight: '700', letterSpacing: 0.5 },
-  compliantBadgeText: { color: '#10B981' },
-  breachedBadgeText: { color: '#EF4444' },
-  sectionHeading: { fontSize: 12, fontWeight: '700', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6 },
-  sectorListContainer: { marginBottom: 16 },
-  sectorBulletNode: { fontSize: 14, color: '#F87171', fontWeight: '600', marginLeft: 6, marginVertical: 2 },
-  advisoryTxt: { color: '#E2E8F0', fontSize: 13, lineHeight: 22, fontWeight: '400' }
+  errorTxt: { 
+    color: '#DC2626', 
+    fontSize: 13, 
+    fontWeight: '600' 
+  },
+  auditResultBox: { 
+    backgroundColor: '#FFFFFF', 
+    padding: 24, 
+    borderRadius: 24, 
+    marginTop: 24, 
+    borderWidth: 1 
+  },
+  compliantBorder: { 
+    borderColor: '#A7F3D0' 
+  },
+  breachedBorder: { 
+    borderColor: '#FCA5A5' 
+  },
+  statusBadge: { 
+    alignSelf: 'flex-start', 
+    paddingHorizontal: 12, 
+    paddingVertical: 6, 
+    borderRadius: 10, 
+    marginBottom: 18,
+    borderWidth: 1
+  },
+  compliantBadge: { 
+    backgroundColor: '#E6F4EA',
+    borderColor: '#A7F3D0'
+  },
+  breachedBadge: { 
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FCA5A5'
+  },
+  badgeText: { 
+    fontSize: 12, 
+    fontWeight: '700',
+    letterSpacing: -0.1
+  },
+  compliantBadgeText: { 
+    color: '#059669' 
+  },
+  breachedBadgeText: { 
+    color: '#DC2626' 
+  },
+  sectionHeading: { 
+    fontSize: 12, 
+    fontWeight: '700', 
+    color: '#475569', 
+    textTransform: 'uppercase', 
+    letterSpacing: 0.5, 
+    marginBottom: 8 
+  },
+  sectorListContainer: { 
+    marginBottom: 18 
+  },
+  sectorBulletNode: { 
+    fontSize: 14, 
+    color: '#DC2626', 
+    fontWeight: '600', 
+    marginLeft: 4, 
+    marginVertical: 3 
+  },
+  advisoryTxt: { 
+    color: '#334155', 
+    fontSize: 14, 
+    lineHeight: 22, 
+    fontWeight: '500',
+    letterSpacing: -0.1
+  }
 });

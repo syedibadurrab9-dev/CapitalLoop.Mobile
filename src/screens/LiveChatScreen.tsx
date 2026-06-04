@@ -30,7 +30,7 @@ export default function LiveChatScreen() {
   const userToken = useSelector((state: RootState) => state.portfolio.user.token);
 
   const [messages, setMessages] = useState<MessageItem[]>([
-    { id: '1', text: 'CapitalLoop Priority Stream Engine online. Enterprise support desk stands ready.', side: 'agent' }
+    { id: '1', text: 'Welcome to CapitalLoop Support. An expert helper is ready to assist you.', side: 'agent' }
   ]);
   const [input, setInput] = useState('');
   const [paywall, setPaywall] = useState(false);
@@ -56,7 +56,6 @@ export default function LiveChatScreen() {
       .configureLogging(SignalR.LogLevel.Information)
       .build();
 
-    // 🚀 FIXED PARAMETERS: Matches the backend (.SendAsync("ReceiveAgentMessage", agentEmail, messagePayload))
     hubConnection.on("ReceiveAgentMessage", (agentEmail: string, messagePayload: string) => {
       console.log(`✉️ Direct message received from agent: ${agentEmail}`);
       setMessages(prev => [
@@ -73,7 +72,7 @@ export default function LiveChatScreen() {
       .catch(err => {
         console.error("❌ SignalR link failure:", err);
         setIsConnecting(false);
-        Alert.alert("Connection Error", "Failed to connect to real-time support gateway.");
+        Alert.alert("Connection Error", "Failed to connect to the live support gateway.");
       });
 
     connectionRef.current = hubConnection;
@@ -108,14 +107,13 @@ export default function LiveChatScreen() {
 
     try {
       if (connectionRef.current && connectionRef.current.state === SignalR.HubConnectionState.Connected) {
-        // Invokes the hub targeting your support specialists group
         await connectionRef.current.invoke("SendMessageToAgent", currentInput);
       } else {
         throw new Error("WebSocket pipeline link is currently unready or broken.");
       }
     } catch (err: any) {
       console.error("Failed to stream message over hub execution link:", err);
-      Alert.alert("Delivery Failure", "Message failed to reach server.");
+      Alert.alert("Delivery Failure", "Message failed to reach the server.");
       setMessages(prev => [...prev, { id: Math.random().toString(), text: "⚠️ Message failed to send.", side: 'agent' }]);
     }
   };
@@ -127,15 +125,15 @@ export default function LiveChatScreen() {
       keyboardVerticalOffset={Platform.OS === 'android' ? 90 : 0} 
     >
       {!isPremium && (
-        <TouchableOpacity style={styles.upgradeBanner} onPress={() => setPaywall(true)}>
+        <TouchableOpacity style={styles.upgradeBanner} onPress={() => setPaywall(true)} activeOpacity={0.9}>
           <Text style={styles.upgradeText}>✨ Live Chat is locked. Tap here to unlock Premium Support.</Text>
         </TouchableOpacity>
       )}
 
       {isConnecting && isPremium && (
         <View style={styles.connectingBanner}>
-          <ActivityIndicator size="small" color="#FFFFFF" style={{ marginRight: 8 }} />
-          <Text style={styles.connectingText}>Syncing with support matrix gateway...</Text>
+          <ActivityIndicator size="small" color="#2563EB" style={{ marginRight: 8 }} />
+          <Text style={styles.connectingText}>Connecting to support chat...</Text>
         </View>
       )}
 
@@ -144,6 +142,7 @@ export default function LiveChatScreen() {
         style={styles.scroller} 
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled" 
+        showsVerticalScrollIndicator={false}
       >
         {messages.map(msg => (
           <ChatBubble key={msg.id} text={msg.text} side={msg.side} />
@@ -160,8 +159,8 @@ export default function LiveChatScreen() {
             style={styles.input} 
             value={input} 
             onChangeText={setInput} 
-            placeholder={isPremium ? "Send secure message over WSS link..." : "Tap to upgrade and unlock support..."} 
-            placeholderTextColor="#475569"
+            placeholder={isPremium ? "Type your message..." : "Tap to upgrade and unlock support..."} 
+            placeholderTextColor="#94A3B8"
             editable={isPremium && !isConnecting} 
           />
           <TouchableOpacity 
@@ -180,36 +179,90 @@ export default function LiveChatScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0F172A' },
+  container: { 
+    flex: 1, 
+    backgroundColor: '#F1F5F9' /* Clean premium light grey slate canvas background */
+  },
   upgradeBanner: {
-    backgroundColor: '#6366F1',
-    paddingVertical: 10,
+    backgroundColor: '#FFFBEB', /* Soft welcoming gold premium upgrade stripe banner */
+    paddingVertical: 12,
     paddingHorizontal: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    borderBottomWidth: 1,
+    borderColor: '#FDE68A'
   },
   upgradeText: {
-    color: '#FFFFFF',
-    fontSize: 12,
+    color: '#D97706',
+    fontSize: 13,
     fontWeight: '700',
     textAlign: 'center',
+    letterSpacing: -0.1
   },
-  connectingBanner: { flexDirection: 'row', backgroundColor: '#0284C7', paddingVertical: 6, paddingHorizontal: 16, justifyContent: 'center', alignItems: 'center' },
-  connectingText: { color: '#FFFFFF', fontSize: 12, fontWeight: '600' },
-  scroller: { flex: 1 },
-  scrollContent: { padding: 20 },
-  inputWrapper: { width: '100%' },
+  connectingBanner: { 
+    flexDirection: 'row', 
+    backgroundColor: '#EFF6FF', 
+    paddingVertical: 10, 
+    paddingHorizontal: 16, 
+    justifyContent: 'center', 
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderColor: '#BFDBFE'
+  },
+  connectingText: { 
+    color: '#2563EB', 
+    fontSize: 13, 
+    fontWeight: '600',
+    letterSpacing: -0.1
+  },
+  scroller: { 
+    flex: 1 
+  },
+  scrollContent: { 
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 30
+  },
+  inputWrapper: { 
+    width: '100%' 
+  },
   inputArea: { 
     flexDirection: 'row', 
-    backgroundColor: '#1E293B', 
-    paddingHorizontal: 12, 
-    paddingVertical: 14, 
+    backgroundColor: '#FFFFFF', /* Pristine crisp paper-white lower utility deck block */
+    paddingHorizontal: 16, 
+    paddingVertical: 16, 
     alignItems: 'center', 
     borderTopWidth: 1, 
-    borderColor: '#334155',
+    borderColor: '#E2E8F0',
+    paddingBottom: Platform.OS === 'ios' ? 24 : 16 /* Smooth negative padding anchor space for iOS gestures */
   },
-  input: { flex: 1, backgroundColor: '#0F172A', color: '#FFFFFF', paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12, fontSize: 14, borderWidth: 1, borderColor: '#334155' },
-  sendBtn: { width: 44, height: 44, borderRadius: 12, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center', marginLeft: 10 },
-  disabledBtn: { backgroundColor: '#64748B', opacity: 0.6 },
-  sendIcon: { color: '#0F172A', fontSize: 16, fontWeight: '800' }
+  input: { 
+    flex: 1, 
+    backgroundColor: '#F8FAFC', 
+    color: '#0F172A', 
+    paddingHorizontal: 16, 
+    paddingVertical: 12, 
+    borderRadius: 14, 
+    fontSize: 15, 
+    borderWidth: 1, 
+    borderColor: '#CBD5E1' 
+  },
+  sendBtn: { 
+    width: 44, 
+    height: 44, 
+    borderRadius: 14, 
+    backgroundColor: '#0F172A', /* Saturated dark ink slate button base */
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    marginLeft: 12 
+  },
+  disabledBtn: { 
+    backgroundColor: '#E2E8F0', 
+    opacity: 0.8 
+  },
+  sendIcon: { 
+    color: '#FFFFFF', 
+    fontSize: 16, 
+    fontWeight: '800' 
+  }
 });

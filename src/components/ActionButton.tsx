@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, ActivityIndicator, StyleProp, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, ActivityIndicator, StyleProp, ViewStyle } from 'react-native';
 
 // 1. Fully-extended Button Interface Properties
 interface ButtonProps {
@@ -7,8 +7,8 @@ interface ButtonProps {
   onPress: () => void | Promise<void>;
   variant?: 'primary' | 'secondary' | 'accent' | 'danger';
   loading?: boolean;
-  disabled?: boolean; // 👈 Added explicit disabled state control
-  style?: StyleProp<ViewStyle>; // Allows passing custom overrides from parent layouts
+  disabled?: boolean;
+  style?: StyleProp<ViewStyle>;
 }
 
 export const ActionButton: React.FC<ButtonProps> = ({ 
@@ -28,7 +28,7 @@ export const ActionButton: React.FC<ButtonProps> = ({
     styles.btn,
     styles[variant],
     isInteractionDisabled && styles.disabledButton,
-    style // Appends dynamic custom parent overrides smoothly
+    style
   ];
 
   const textStyle = [
@@ -37,13 +37,14 @@ export const ActionButton: React.FC<ButtonProps> = ({
     isInteractionDisabled && styles.disabledText
   ];
 
-  // 4. Resolve exact loader color token target mapping
+  // 4. Resolve exact loader color token target mapping matching our light theme canvas
   const getLoaderColor = (): string => {
     switch (variant) {
-      case 'primary': return '#0F172A';
-      case 'secondary': return '#94A3B8';
-      case 'danger': return '#EF4444';
-      default: return '#FFFFFF';
+      case 'primary': return '#FFFFFF';
+      case 'secondary': return '#2563EB';
+      case 'accent': return '#FFFFFF';
+      case 'danger': return '#DC2626';
+      default: return '#0F172A';
     }
   };
 
@@ -52,7 +53,7 @@ export const ActionButton: React.FC<ButtonProps> = ({
       style={buttonStyle} 
       onPress={onPress} 
       disabled={isInteractionDisabled}
-      activeOpacity={0.7} // Provides a premium native button press response feedback
+      activeOpacity={0.8}
     >
       {loading ? (
         <ActivityIndicator color={getLoaderColor()} size="small" />
@@ -63,53 +64,54 @@ export const ActionButton: React.FC<ButtonProps> = ({
   );
 };
 
-// 5. High-Performance Static Stylesheet Configuration Matrix
+// 5. Light-Mode High-Performance Static Stylesheet Matrix
 const styles = StyleSheet.create({
   btn: { 
     width: '100%', 
     paddingVertical: 16, 
-    borderRadius: 14, 
+    borderRadius: 16, 
     alignItems: 'center', 
     marginVertical: 6, 
     borderWidth: 1, 
-    borderColor: '#334155', 
     justifyContent: 'center' 
   },
   txt: { 
     fontSize: 15, 
-    fontWeight: '700' 
+    fontWeight: '700',
+    letterSpacing: -0.1
   },
   
-  // Variant Background Maps
+  // Premium Tactile Light Variant Profiles
   primary: { 
-    backgroundColor: '#FFFFFF',
-    borderColor: '#E2E8F0'
+    backgroundColor: '#0F172A', /* Deep elegant midnight slate fill */
+    borderColor: '#0F172A'
   },
   secondary: { 
-    backgroundColor: '#1E293B',
-    borderColor: '#334155'
+    backgroundColor: '#FFFFFF', /* Soft floating glass canvas block */
+    borderColor: '#E2E8F0'
   },
   accent: { 
-    backgroundColor: '#6366F1',
+    backgroundColor: '#2563EB', /* Vibrant institutional digital sapphire blue */
     borderColor: 'transparent'
   },
   danger: { 
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-    borderColor: 'rgba(239, 68, 68, 0.2)'
+    backgroundColor: '#FEF2F2', /* Muted premium rose background */
+    borderColor: '#FEE2E2'
   },
 
-  // Variant Text Color Maps
-  primaryText: { color: '#0F172A' },
-  secondaryText: { color: '#94A3B8' },
+  // Premium Typographic Mappings
+  primaryText: { color: '#FFFFFF' },
+  secondaryText: { color: '#334155' },
   accentText: { color: '#FFFFFF' },
-  dangerText: { color: '#EF4444' },
+  dangerText: { color: '#DC2626' },
 
-  // Interaction Blocking Utility Modifiers
+  // Interaction State Modifiers
   disabledButton: {
-    opacity: 0.5,
-    borderColor: 'transparent'
+    backgroundColor: '#E2E8F0',
+    borderColor: 'transparent',
+    opacity: 0.6
   },
   disabledText: {
-    color: '#64748B'
+    color: '#94A3B8'
   }
 });
