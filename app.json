@@ -6,22 +6,30 @@
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#0F172A",
+    "icon": "./src/assets/images/icon.png",
     "scheme": "capitalloop",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ibad.capitalloop",
+      "bundleIdentifier": "com.capitalloop.mobile",
       "infoPlist": {
         "NSCameraUsageDescription": "CapitalLoop requires access to your camera to seamlessly scan your Binance API Management desktop QR codes."
       }
     },
     "android": {
-      "package": "com.ibad.capitalloop",
+      "package": "com.capitalloop.mobile",
+      "usesCleartextTraffic": true,
       "adaptiveIcon": {
+        "foregroundImage": "./src/assets/images/adaptive-icon.png",
         "backgroundColor": "#0F172A"
       },
       "permissions": [
         "android.permission.CAMERA"
       ]
+    },
+    "splash": {
+      "image": "./src/assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0F172A"
     },
     "plugins": [
       "expo-dev-client",
@@ -30,6 +38,13 @@
         "expo-camera",
         {
           "cameraPermission": "Allow CapitalLoop to access your device camera to scan account desktop links smoothly."
+        }
+      ],
+      [
+        "expo-router",
+        {
+          "origin": "https://capitalloop.com",
+          "root": "src/app"
         }
       ]
     ],
