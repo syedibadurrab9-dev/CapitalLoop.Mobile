@@ -11,7 +11,14 @@ import { ActionButton } from '../components/ActionButton';
 // Ensure redirect handling works across native web view and standalone browsers
 WebBrowser.maybeCompleteAuthSession();
 
-const BACKEND_API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:5156';
+const resolveBackendUrl = () => {
+  const envUrl = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:5156';
+  if (Platform.OS === 'android' && envUrl.includes('localhost')) {
+    return envUrl.replace('localhost', '192.168.18.10');
+  }
+  return envUrl;
+};
+const BACKEND_API_BASE_URL = resolveBackendUrl();
 const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '';
 const ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || '';
 
@@ -214,10 +221,10 @@ export default function AuthScreen({ navigation }: NativeStackScreenProps<any>):
 
         {/* Auth Action Stack */}
         <View style={styles.btnGroup}>
-          {/* Primary: Standard Google SSO PKCE */}
+          {/* Primary: Native Google SSO on Android, PKCE on Web */}
           <ActionButton
-            title="Continue with Google (PKCE)"
-            onPress={handleGooglePkceLogin}
+            title="Sign in with Google"
+            onPress={Platform.OS === 'android' ? handleNativeGoogleLogin : handleGooglePkceLogin}
             variant="primary"
             loading={loading}
           />
