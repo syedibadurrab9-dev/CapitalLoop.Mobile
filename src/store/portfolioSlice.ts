@@ -117,7 +117,7 @@ interface PortfolioState {
 
 // --- ASYNCHRONOUS NETWORK THUNK ENGINE CHANNELS ---
 
-const BACKEND_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+const BACKEND_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'https://periodically-emails-whereas-evans.trycloudflare.com';
 
 /**
  * Thunk 1: Posts scanned key/secret string tokens over to the .NET proxy synchronization hub.

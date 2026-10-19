@@ -12,10 +12,7 @@ import { ActionButton } from '../components/ActionButton';
 WebBrowser.maybeCompleteAuthSession();
 
 const resolveBackendUrl = () => {
-  const envUrl = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:5156';
-  if (Platform.OS === 'android' && envUrl.includes('localhost')) {
-    return envUrl.replace('localhost', '192.168.18.10');
-  }
+  const envUrl = process.env.EXPO_PUBLIC_API_BASE_URL || 'https://periodically-emails-whereas-evans.trycloudflare.com';
   return envUrl;
 };
 const BACKEND_API_BASE_URL = resolveBackendUrl();
