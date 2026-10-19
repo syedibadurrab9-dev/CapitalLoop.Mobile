@@ -16,10 +16,9 @@ import { RootState } from '../store';
 import { PaywallModal } from '../components/PaywallModal';
 import { ChatBubble } from '../components/ChatBubble';
 import * as SignalR from '@microsoft/signalr';
+import { getApiBaseUrl } from '../services/gatewayService';
 
-const BACKEND_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL ||
-  'https://periodically-emails-whereas-evans.trycloudflare.com';
+const getBackendUrl = () => getApiBaseUrl();
 
 interface MessageItem {
   id: string;
@@ -50,7 +49,7 @@ export default function LiveChatScreen() {
     setIsConnecting(true);
 
     const hubConnection = new SignalR.HubConnectionBuilder()
-      .withUrl(`${BACKEND_URL}/support-hub?access_token=${userToken}`, {
+      .withUrl(`${getBackendUrl()}/support-hub?access_token=${userToken}`, {
         skipNegotiation: true,
         transport: SignalR.HttpTransportType.WebSockets
       })

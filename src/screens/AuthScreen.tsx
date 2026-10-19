@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View, StatusBar, Alert, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { StyleSheet, Text, View, StatusBar, Alert, TouchableOpacity, ScrollView, Platform, TextInput } from 'react-native';
 import { useDispatch } from 'react-redux';
 import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
@@ -7,15 +7,11 @@ import { GoogleSignin, isSuccessResponse, statusCodes } from '@react-native-goog
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { setGoogleAuth } from '../store/portfolioSlice';
 import { ActionButton } from '../components/ActionButton';
+import { getApiBaseUrl, setApiBaseUrl, syncRemoteGatewayUrl } from '../services/gatewayService';
 
 // Ensure redirect handling works across native web view and standalone browsers
 WebBrowser.maybeCompleteAuthSession();
 
-const resolveBackendUrl = () => {
-  const envUrl = process.env.EXPO_PUBLIC_API_BASE_URL || 'https://periodically-emails-whereas-evans.trycloudflare.com';
-  return envUrl;
-};
-const BACKEND_API_BASE_URL = resolveBackendUrl();
 const WEB_CLIENT_ID =
   process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
   '451325656019-drjb9j6j2g8hcq99697c3dv2m4nhdbu0.apps.googleusercontent.com';
@@ -44,6 +40,13 @@ export default function AuthScreen({ navigation }: NativeStackScreenProps<any>):
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [showSandboxOptions, setShowSandboxOptions] = useState(false);
+  const [serverUrl, setServerUrl] = useState(getApiBaseUrl());
+
+  useEffect(() => {
+    syncRemoteGatewayUrl().then((synced) => {
+      if (synced) setServerUrl(synced);
+    });
+  }, []);
 
   // =========================================================================
   // 🔐 STANDARDS-COMPLIANT OAUTH 2.0 PKCE REQUEST HOOK (EXPO AUTH SESSION)
@@ -102,7 +105,8 @@ export default function AuthScreen({ navigation }: NativeStackScreenProps<any>):
     try {
       setLoading(true);
 
-      const res = await fetch(`${BACKEND_API_BASE_URL}/api/Auth/google-sso`, {
+      const activeUrl = getApiBaseUrl();
+      const res = await fetch(`${activeUrl}/api/Auth/google-sso`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -330,6 +334,37 @@ export default function AuthScreen({ navigation }: NativeStackScreenProps<any>):
                   📱 Try Native Play Services Sign-in
                 </Text>
               </TouchableOpacity>
+
+              {/* Dynamic Gateway Configuration */}
+              <View style={{ marginTop: 12, padding: 10, backgroundColor: '#FFFFFF', borderRadius: 8, borderWidth: 1, borderColor: '#CBD5E1' }}>
+                <Text style={{ fontSize: 12, fontWeight: '700', color: '#1E293B', marginBottom: 4 }}>
+                  🌐 Cloud Gateway URL:
+                </Text>
+                <TextInput
+                  style={{
+                    backgroundColor: '#F8FAFC',
+                    borderWidth: 1,
+                    borderColor: '#94A3B8',
+                    borderRadius: 6,
+                    paddingHorizontal: 8,
+                    paddingVertical: 6,
+                    fontSize: 12,
+                    color: '#0F172A',
+                  }}
+                  value={serverUrl}
+                  onChangeText={(val) => {
+                    setServerUrl(val);
+                    setApiBaseUrl(val);
+                  }}
+                  placeholder="https://...trycloudflare.com"
+                  placeholderTextColor="#94A3B8"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+                <Text style={{ fontSize: 11, color: '#64748B', marginTop: 4 }}>
+                  Auto-syncs via GitHub gateway.json or paste any active tunnel URL.
+                </Text>
+              </View>
             </View>
           )}
         </View>

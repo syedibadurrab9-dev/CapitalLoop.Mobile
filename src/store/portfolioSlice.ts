@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { getApiBaseUrl } from '../services/gatewayService';
 
 // --- STRUCTURAL TYPING MATRIX CONTRACTS ---
 
@@ -117,7 +118,7 @@ interface PortfolioState {
 
 // --- ASYNCHRONOUS NETWORK THUNK ENGINE CHANNELS ---
 
-const BACKEND_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'https://periodically-emails-whereas-evans.trycloudflare.com';
+const getBackendBaseUrl = () => getApiBaseUrl();
 
 /**
  * Thunk 1: Posts scanned key/secret string tokens over to the .NET proxy synchronization hub.
@@ -136,7 +137,7 @@ export const linkBinanceWallet = createAsyncThunk(
 
       // ✅ FIXED: Injected "/api" path mapping explicitly before the controller segment
       const response = await axios.post(
-        `${BACKEND_BASE_URL}/api/Portfolio/sync/binance`,
+        `${getBackendBaseUrl()}/api/Portfolio/sync/binance`,
         { apiKey: payload.apiKey, secretKey: payload.secretKey },
         config
       );
@@ -170,7 +171,7 @@ export const fetchRiskAuditSummary = createAsyncThunk(
 
       // ✅ FIXED: Injected "/api" path mapping explicitly before the controller segment
       const response = await axios.get(
-        `${BACKEND_BASE_URL}/api/AiAdvisor/audit-exposure?maxSectorCapPercentage=${payload.maxCap}`,
+        `${getBackendBaseUrl()}/api/AiAdvisor/audit-exposure?maxSectorCapPercentage=${payload.maxCap}`,
         config
       );
 
@@ -210,7 +211,7 @@ export const submitKycVerification = createAsyncThunk(
       };
 
       const response = await axios.post(
-        `${BACKEND_BASE_URL}/api/Kyc/submit`,
+        `${getBackendBaseUrl()}/api/Kyc/submit`,
         {
           documentType: payload.documentType,
           documentNumber: payload.documentNumber,
@@ -260,7 +261,7 @@ export const updateRealEstateInstallment = createAsyncThunk(
       };
 
       const response = await axios.put(
-        `${BACKEND_BASE_URL}/api/Portfolio/real-estate/${payload.assetId}/installments`,
+        `${getBackendBaseUrl()}/api/Portfolio/real-estate/${payload.assetId}/installments`,
         {
           paidInstallments: payload.paidInstallments,
           totalInstallments: payload.totalInstallments,
@@ -300,7 +301,7 @@ export const evaluateSuitability = createAsyncThunk(
       };
 
       const response = await axios.post(
-        `${BACKEND_BASE_URL}/api/AiAdvisor/suitability/evaluate`,
+        `${getBackendBaseUrl()}/api/AiAdvisor/suitability/evaluate`,
         { answers: payload.answers },
         config
       );
@@ -336,7 +337,7 @@ export const fetchSuitabilityProfile = createAsyncThunk(
       };
 
       const response = await axios.get(
-        `${BACKEND_BASE_URL}/api/AiAdvisor/suitability/profile`,
+        `${getBackendBaseUrl()}/api/AiAdvisor/suitability/profile`,
         config
       );
 
@@ -372,7 +373,7 @@ export const fetchKycStatus = createAsyncThunk(
       };
 
       const response = await axios.get(
-        `${BACKEND_BASE_URL || 'http://localhost:5156'}/api/Kyc/status`,
+        `${getBackendBaseUrl()}/api/Kyc/status`,
         config
       );
 

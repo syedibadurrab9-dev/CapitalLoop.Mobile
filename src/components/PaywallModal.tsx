@@ -4,10 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { upgradeTier } from '../store/portfolioSlice';
 import { RootState } from '../store';
 import axios from 'axios';
-
-const BACKEND_BASE_URL =
-  process.env.EXPO_PUBLIC_API_BASE_URL ||
-  'https://periodically-emails-whereas-evans.trycloudflare.com';
+import { getApiBaseUrl } from '../services/gatewayService';
 
 export const PaywallModal = ({ visible, onClose }: { visible: boolean; onClose: () => void }) => {
   const dispatch = useDispatch();
@@ -20,7 +17,7 @@ export const PaywallModal = ({ visible, onClose }: { visible: boolean; onClose: 
     try {
       if (token) {
         await axios.post(
-          `${BACKEND_BASE_URL}/api/Subscriptions/upgrade`,
+          `${getApiBaseUrl()}/api/Subscriptions/upgrade`,
           {},
           { headers: { Authorization: `Bearer ${token}`, 'X-Requested-With': 'XMLHttpRequest' } }
         );
