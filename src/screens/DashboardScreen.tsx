@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, ScrollView, View, TouchableOpacity, ActivityIndicator, Pressable } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../store';
-import { toggleCurrency, triggerApiSync, clearAuth } from '../store/portfolioSlice';
+import { toggleCurrency, triggerApiSync, clearAuth, updateRealEstateInstallment, updateInstallmentLocal, fetchKycStatus } from '../store/portfolioSlice';
 import { PaywallModal } from '../components/PaywallModal';
 import { TickerTapeBar } from '../components/TickerTapeBar';
 import { AssetSummaryCard } from '../components/AssetSummaryCard';
@@ -48,6 +48,12 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
     }
   };
 
+  useEffect(() => {
+    if (user.token && !user.token.startsWith('mock-')) {
+      dispatch(fetchKycStatus());
+    }
+  }, [user.token]);
+
   return (
     <View style={styles.wrapper}>
       {/* Real-time Streaming Ticker Telemetry Strip */}
@@ -63,23 +69,61 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
             PORTFOLIO USER IDENTITY SECTION
            ============================================================================== */}
         <View style={styles.header}>
-          <View>
-            <Text style={styles.welcome}>Secure Session Active</Text>
+          <View style={styles.userInfoCol}>
+            <View style={styles.roleTagRow}>
+              <Text style={styles.roleTag}>
+                {user.role} • {user.isPremiumUser ? 'Wealth VIP' : 'Retail Standard'}
+              </Text>
+            </View>
             <Text style={styles.name}>{user.name}</Text>
+            {user.email ? <Text style={styles.userEmail}>{user.email}</Text> : null}
           </View>
-          <TouchableOpacity 
-            style={[
-              styles.pill, 
-              user.isPremiumUser ? styles.pillPro : styles.pillUpgrade
-            ]} 
-            onPress={() => !user.isPremiumUser && setPaywall(true)}
-            activeOpacity={0.7}
-          >
-            <View style={[styles.dot, { backgroundColor: user.isPremiumUser ? '#059669' : '#D97706' }]} />
-            <Text style={[styles.pillTxt, { color: user.isPremiumUser ? '#047857' : '#B45309' }]}>
-              {user.isPremiumUser ? 'Premium' : 'Upgrade Plan'}
-            </Text>
-          </TouchableOpacity>
+
+          <View style={styles.headerActionCluster}>
+            {/* SECP KYC Verification Status Pill */}
+            <TouchableOpacity
+              style={[
+                styles.kycPill,
+                user.kycStatus === 'Approved' ? styles.kycApproved :
+                user.kycStatus === 'Pending' ? styles.kycPending : styles.kycUnverified
+              ]}
+              onPress={() => navigation.navigate('KycRoute')}
+              activeOpacity={0.7}
+            >
+              <Text style={[
+                styles.kycTxt,
+                user.kycStatus === 'Approved' ? styles.kycTxtApproved :
+                user.kycStatus === 'Pending' ? styles.kycTxtPending : styles.kycTxtUnverified
+              ]}>
+                {user.kycStatus === 'Approved' ? '✓ Verified' :
+                 user.kycStatus === 'Pending' ? '⏳ Under Review' : '⚠️ Verify CNIC'}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Plan Tier Pill */}
+            <TouchableOpacity 
+              style={[
+                styles.pill, 
+                user.isPremiumUser ? styles.pillPro : styles.pillUpgrade
+              ]} 
+              onPress={() => !user.isPremiumUser && setPaywall(true)}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.dot, { backgroundColor: user.isPremiumUser ? '#059669' : '#D97706' }]} />
+              <Text style={[styles.pillTxt, { color: user.isPremiumUser ? '#047857' : '#B45309' }]}>
+                {user.isPremiumUser ? 'Premium' : 'Upgrade'}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Logout button */}
+            <TouchableOpacity
+              style={styles.logoutBtn}
+              onPress={() => dispatch(clearAuth())}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.logoutTxt}>🚪</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* ==============================================================================
@@ -183,9 +227,17 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
         {assets.map((asset) => (
           <AssetSummaryCard
             key={asset.id}
+            id={asset.id}
             name={asset.name}
             category={asset.category}
             isAutoSynced={asset.isAutoSynced}
+            installmentsPaid={asset.installmentsPaid}
+            totalInstallments={asset.totalInstallments}
+            holdingValuePKR={asset.holdingValuePKR}
+            onUpdateInstallment={(paid, total) => {
+              dispatch(updateInstallmentLocal({ assetId: asset.id, paidInstallments: paid, totalInstallments: total }));
+              dispatch(updateRealEstateInstallment({ assetId: asset.id, paidInstallments: paid, totalInstallments: total }));
+            }}
             valueDisplay={
               currencyToggle === 'PKR' 
                 ? `Rs. ${asset.holdingValuePKR.toLocaleString()}` 
@@ -221,8 +273,22 @@ const styles = StyleSheet.create({
   header: { 
     flexDirection: 'row', 
     justifyContent: 'space-between', 
-    alignItems: 'center', 
-    marginBottom: 28 
+    alignItems: 'flex-start', 
+    marginBottom: 24 
+  },
+  userInfoCol: {
+    flex: 1,
+    marginRight: 12,
+  },
+  roleTagRow: {
+    marginBottom: 2,
+  },
+  roleTag: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#2563EB',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   welcome: { 
     fontSize: 12, 
@@ -231,20 +297,71 @@ const styles = StyleSheet.create({
     letterSpacing: 0.1
   },
   name: { 
-    fontSize: 26, 
+    fontSize: 22, 
     fontWeight: '800', 
-    color: '#0F172A', /* Deep ink-slate primary color scales */
-    marginTop: 3, 
+    color: '#0F172A',
     letterSpacing: -0.5 
+  },
+  userEmail: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  headerActionCluster: {
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    gap: 6,
+  },
+  kycPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  kycApproved: {
+    backgroundColor: '#ECFDF5',
+    borderColor: '#A7F3D0',
+  },
+  kycPending: {
+    backgroundColor: '#FFFBEB',
+    borderColor: '#FDE68A',
+  },
+  kycUnverified: {
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FECACA',
+  },
+  kycTxt: {
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  kycTxtApproved: {
+    color: '#059669',
+  },
+  kycTxtPending: {
+    color: '#D97706',
+  },
+  kycTxtUnverified: {
+    color: '#DC2626',
+  },
+  logoutBtn: {
+    padding: 6,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginTop: 2,
+  },
+  logoutTxt: {
+    fontSize: 12,
   },
   pill: { 
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14, 
-    paddingVertical: 7, 
-    borderRadius: 20, 
+    paddingHorizontal: 10, 
+    paddingVertical: 5, 
+    borderRadius: 14, 
     borderWidth: 1, 
-    gap: 6
+    gap: 5
   },
   pillPro: {
     backgroundColor: '#E6F4EA', 

@@ -10,11 +10,23 @@ export const ChatBubble = ({ text, side }: BubbleProps) => {
   const isUser = side === 'user';
   const isAi = side === 'ai';
 
+  const isConsultantVerified = text.startsWith('[Verified');
+  let cleanText = text;
+  let consultantBadge = '';
+
+  if (isConsultantVerified) {
+    const endBracket = text.indexOf(']');
+    if (endBracket !== -1) {
+      consultantBadge = text.substring(1, endBracket);
+      cleanText = text.substring(endBracket + 1).trim();
+    }
+  }
+
   // Human-friendly sender label mapping
   const getSenderLabel = () => {
     switch (side) {
       case 'user': return 'You';
-      case 'agent': return 'Priority Support Agent';
+      case 'agent': return consultantBadge ? `🛡️ ${consultantBadge}` : 'Priority Support Agent';
       case 'ai': return 'AI Wealth Insights';
       default: return '';
     }
@@ -24,13 +36,14 @@ export const ChatBubble = ({ text, side }: BubbleProps) => {
     <View style={[styles.container, isUser ? styles.userAlign : styles.agentAlign]}>
       <View style={[
         styles.bubble, 
-        isUser ? styles.userBg : isAi ? styles.aiBg : styles.agentBg
+        isUser ? styles.userBg : isAi ? styles.aiBg : styles.agentBg,
+        isConsultantVerified ? styles.verifiedAgentBorder : null
       ]}>
-        <Text style={[styles.senderLabel, isUser ? styles.userLabelTxt : styles.agentLabelTxt]}>
+        <Text style={[styles.senderLabel, isUser ? styles.userLabelTxt : isConsultantVerified ? styles.verifiedLabelTxt : styles.agentLabelTxt]}>
           {getSenderLabel()}
         </Text>
         <Text style={[styles.txt, isUser ? styles.userTxt : isAi ? styles.aiTxt : styles.agentTxt]}>
-          {text}
+          {cleanText}
         </Text>
       </View>
     </View>
@@ -91,6 +104,15 @@ const styles = StyleSheet.create({
   },
   agentLabelTxt: { 
     color: '#64748B' 
+  },
+  verifiedLabelTxt: {
+    color: '#059669',
+    fontWeight: '700'
+  },
+  verifiedAgentBorder: {
+    borderColor: '#6EE7B7',
+    borderWidth: 1.5,
+    backgroundColor: '#F0FDF4'
   },
 
   // Main Bubble Message Prose Configuration

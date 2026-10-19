@@ -149,6 +149,32 @@ export default function LiveChatScreen() {
         ))}
       </ScrollView>
 
+      {/* Quick Prompt Chips */}
+      {isPremium && (
+        <View style={styles.quickPromptsWrap}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.quickPromptsContainer}>
+            <TouchableOpacity 
+              style={styles.promptChip} 
+              onPress={() => setInput("What is the CGT rate on selling PSX shares before 1 year?")}
+            >
+              <Text style={styles.promptChipText}>📊 PSX CGT Rate</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.promptChip} 
+              onPress={() => setInput("How does PKR devaluation protect my Gold Tola holdings?")}
+            >
+              <Text style={styles.promptChipText}>🪙 Gold vs Devaluation</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.promptChip} 
+              onPress={() => setInput("What is the SECP limit on Binance crypto holdings?")}
+            >
+              <Text style={styles.promptChipText}>⚡ SECP Crypto Cap</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+      )}
+
       <TouchableOpacity 
         activeOpacity={1} 
         onPress={!isPremium ? () => setPaywall(true) : undefined}
@@ -264,5 +290,28 @@ const styles = StyleSheet.create({
     color: '#FFFFFF', 
     fontSize: 16, 
     fontWeight: '800' 
-  }
+  },
+  quickPromptsWrap: {
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+    paddingVertical: 8,
+  },
+  quickPromptsContainer: {
+    paddingHorizontal: 16,
+    gap: 8,
+  },
+  promptChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  promptChipText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#334155',
+  },
 });

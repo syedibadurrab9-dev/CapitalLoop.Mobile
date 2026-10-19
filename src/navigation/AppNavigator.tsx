@@ -7,6 +7,7 @@ import { RootState } from '../store';
 import { StatusBar } from 'expo-status-bar';
 
 // Screen Imports
+import OnboardingScreen from '../screens/OnboardingScreen';
 import AuthScreen from '../screens/AuthScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import AssetInputScreen from '../screens/AssetInputScreen';
@@ -17,6 +18,7 @@ import LiveChatScreen from '../screens/LiveChatScreen';
 
 // Declare explicit type bindings for navigation param mapping
 export type RootStackParamList = {
+  Onboarding: undefined;
   Auth: undefined;
   Dashboard: undefined;
   AssetInput: undefined;
@@ -30,6 +32,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
   const isAuthenticated = useSelector((state: RootState) => state.portfolio.user.isAuthenticated);
+  const hasSeenOnboarding = useSelector((state: RootState) => state.portfolio.hasSeenOnboarding);
 
   return (
     <>
@@ -37,6 +40,7 @@ export default function AppNavigator() {
       <StatusBar style="dark" animated={true} />
 
       <Stack.Navigator 
+        initialRouteName={!hasSeenOnboarding ? 'Onboarding' : 'Auth'}
         screenOptions={{ 
           headerStyle: { backgroundColor: '#FFFFFF' },
           headerTintColor: '#0F172A',
@@ -48,11 +52,18 @@ export default function AppNavigator() {
       >
         {!isAuthenticated ? (
           // Unauthenticated Flow
-          <Stack.Screen 
-            name="Auth" 
-            component={AuthScreen} 
-            options={{ headerShown: false }} 
-          />
+          <>
+            <Stack.Screen 
+              name="Onboarding" 
+              component={OnboardingScreen} 
+              options={{ headerShown: false }} 
+            />
+            <Stack.Screen 
+              name="Auth" 
+              component={AuthScreen} 
+              options={{ headerShown: false }} 
+            />
+          </>
         ) : (
           // Authenticated Secured Ledger Stack Nodes
           <>
