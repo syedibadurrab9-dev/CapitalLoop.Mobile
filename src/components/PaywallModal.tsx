@@ -5,7 +5,9 @@ import { upgradeTier } from '../store/portfolioSlice';
 import { RootState } from '../store';
 import axios from 'axios';
 
-const BACKEND_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+const BACKEND_BASE_URL =
+  process.env.EXPO_PUBLIC_API_BASE_URL ||
+  'https://periodically-emails-whereas-evans.trycloudflare.com';
 
 export const PaywallModal = ({ visible, onClose }: { visible: boolean; onClose: () => void }) => {
   const dispatch = useDispatch();

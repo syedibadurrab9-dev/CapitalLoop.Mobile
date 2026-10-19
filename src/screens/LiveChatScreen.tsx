@@ -17,7 +17,9 @@ import { PaywallModal } from '../components/PaywallModal';
 import { ChatBubble } from '../components/ChatBubble';
 import * as SignalR from '@microsoft/signalr';
 
-const BACKEND_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
+const BACKEND_URL =
+  process.env.EXPO_PUBLIC_API_BASE_URL ||
+  'https://periodically-emails-whereas-evans.trycloudflare.com';
 
 interface MessageItem {
   id: string;

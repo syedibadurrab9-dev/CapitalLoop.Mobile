@@ -16,8 +16,23 @@ const resolveBackendUrl = () => {
   return envUrl;
 };
 const BACKEND_API_BASE_URL = resolveBackendUrl();
-const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '';
-const ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || '';
+const WEB_CLIENT_ID =
+  process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
+  '451325656019-drjb9j6j2g8hcq99697c3dv2m4nhdbu0.apps.googleusercontent.com';
+const ANDROID_CLIENT_ID =
+  process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ||
+  '451325656019-cbe10rmdlnpf5oc97efifn7i2rta4lpd.apps.googleusercontent.com';
+
+// Pre-configure Google Sign-In with verified Web Client ID so the native client is never null
+try {
+  GoogleSignin.configure({
+    webClientId: WEB_CLIENT_ID,
+    offlineAccess: true,
+    forceCodeForRefreshToken: true,
+  });
+} catch (e) {
+  console.log('ℹ️ GoogleSignin pre-configuration deferred:', e);
+}
 
 const googleDiscovery: AuthSession.DiscoveryDocument = {
   authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
@@ -50,16 +65,17 @@ export default function AuthScreen({ navigation }: NativeStackScreenProps<any>):
   );
 
   // =========================================================================
-  // ⚙️ INITIALIZE NATIVE GOOGLE ENGINE (OPTIONAL HARDWARE ACCELERATION)
+  // ⚙️ INITIALIZE NATIVE GOOGLE ENGINE
   // =========================================================================
   useEffect(() => {
     try {
       GoogleSignin.configure({
         webClientId: WEB_CLIENT_ID,
         offlineAccess: true,
+        forceCodeForRefreshToken: true,
       });
     } catch (e) {
-      console.log('ℹ️ Native GoogleSignin not configured or headless environment.');
+      console.log('ℹ️ Native GoogleSignin configure notice:', e);
     }
   }, []);
 
@@ -148,28 +164,60 @@ export default function AuthScreen({ navigation }: NativeStackScreenProps<any>):
   };
 
   /**
-   * Native Device Fallback: GoogleSignin with Play Services
+   * Native Device Flow: GoogleSignin with Play Services
    */
   const handleNativeGoogleLogin = async (): Promise<void> => {
     try {
       setLoading(true);
-      await GoogleSignin.hasPlayServices();
+
+      // 1. Verify Google Play Services is available on device
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+
+      // 2. Explicitly re-apply configure so native _apiClient is guaranteed initialized
+      GoogleSignin.configure({
+        webClientId: WEB_CLIENT_ID,
+        offlineAccess: true,
+        forceCodeForRefreshToken: true,
+      });
+
+      // 3. Clear any lingering session
       try {
         await GoogleSignin.signOut();
       } catch {
-        // Ignored
+        // Ignored if user not already logged in
       }
+
+      // 4. Trigger Native Google Sign-In
       const res = await GoogleSignin.signIn();
       if (isSuccessResponse(res)) {
-        const idToken = res.data.idToken;
-        if (!idToken) throw new Error('ID Token not found in native response.');
-        await exchangeCodeWithBackend(idToken);
+        let idToken = res.data.idToken;
+
+        // Fallback: If idToken is null, try retrieving via getTokens()
+        if (!idToken) {
+          try {
+            const tokens = await GoogleSignin.getTokens();
+            idToken = tokens.idToken;
+          } catch (tErr) {
+            console.log('ℹ️ getTokens fallback note:', tErr);
+          }
+        }
+
+        const tokenToExchange = idToken || res.data.serverAuthCode;
+        if (!tokenToExchange) {
+          throw new Error('ID Token not found in native Google response.');
+        }
+
+        await exchangeCodeWithBackend(tokenToExchange);
       }
     } catch (err: any) {
       if (err.code === statusCodes.SIGN_IN_CANCELLED) {
         console.log('User cancelled sign-in.');
       } else {
-        Alert.alert('Native Sign-in Failed', err?.message || 'Native identity flow failed.');
+        console.error('[NATIVE GOOGLE SIGN-IN ERROR]', err);
+        Alert.alert(
+          'Native Sign-in Failed',
+          err?.message || 'Native identity flow failed. Please verify network and Google Play Services.'
+        );
       }
     } finally {
       setLoading(false);
