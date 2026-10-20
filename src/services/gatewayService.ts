@@ -1,7 +1,7 @@
 // Initial default URL matching active Cloudflare tunnel
 let currentApiUrl =
   process.env.EXPO_PUBLIC_API_BASE_URL ||
-  'https://cricket-queen-maintain-bennett.trycloudflare.com';
+  'https://debian-classifieds-phases-drawings.trycloudflare.com';
 
 const REMOTE_GATEWAY_CONFIG_URL =
   'https://raw.githubusercontent.com/syedibadurrab9-dev/CapitalLoop.Mobile/main/gateway.json';

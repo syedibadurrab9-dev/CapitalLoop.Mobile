@@ -16,7 +16,7 @@
         "credentialsSource": "local"
       },
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://cricket-queen-maintain-bennett.trycloudflare.com",
+        "EXPO_PUBLIC_API_BASE_URL": "https://debian-classifieds-phases-drawings.trycloudflare.com",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "451325656019-drjb9j6j2g8hcq99697c3dv2m4nhdbu0.apps.googleusercontent.com",
         "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "451325656019-cbe10rmdlnpf5oc97efifn7i2rta4lpd.apps.googleusercontent.com"
       }
