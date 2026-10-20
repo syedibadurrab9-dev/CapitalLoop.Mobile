@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { AssetNode } from '../store/portfolioSlice';
 
 // Sovereign palette matching institutional asset classes
-const CHART_COLORS = ['#10B981', '#F59E0B', '#38BDF8', '#8B5CF6', '#EC4899', '#14B8A6'];
+const CHART_COLORS = ['#10B981', '#F59E0B', '#0284C7', '#8B5CF6', '#EC4899', '#14B8A6'];
 
 export const PortfolioChart = ({ assets }: { assets: AssetNode[] }) => {
   // Aggregate absolute overall portfolio value in localized PKR
@@ -63,12 +63,17 @@ export const PortfolioChart = ({ assets }: { assets: AssetNode[] }) => {
 
 const styles = StyleSheet.create({
   container: { 
-    backgroundColor: '#0D1524', 
-    padding: 22, 
+    backgroundColor: '#FFFFFF', 
+    padding: 20, 
     borderRadius: 20, 
     borderWidth: 1, 
-    borderColor: 'rgba(255, 255, 255, 0.08)', 
-    marginVertical: 14,
+    borderColor: '#E2E8F0', 
+    marginVertical: 12,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
   },
   headerRow: {
     flexDirection: 'row',
@@ -77,28 +82,28 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   title: { 
-    fontSize: 12, 
-    fontWeight: '700', 
-    color: '#94A3B8', 
+    fontSize: 12.5, 
+    fontWeight: '800', 
+    color: '#0F172A', 
     letterSpacing: 0.5,
     textTransform: 'uppercase',
   },
   badge: {
-    fontSize: 9,
-    fontWeight: '700',
-    color: '#34D399',
-    backgroundColor: 'rgba(16, 185, 129, 0.12)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#059669',
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
     borderWidth: 1,
-    borderColor: 'rgba(16, 185, 129, 0.25)',
+    borderColor: '#A7F3D0',
   },
   barContainer: { 
-    height: 12, 
+    height: 10, 
     width: '100%', 
-    backgroundColor: '#06090F', 
-    borderRadius: 6, 
+    backgroundColor: '#F1F5F9', 
+    borderRadius: 5, 
     flexDirection: 'row', 
     overflow: 'hidden',
     gap: 1.5 
@@ -109,7 +114,7 @@ const styles = StyleSheet.create({
   legendRow: { 
     flexDirection: 'row', 
     flexWrap: 'wrap', 
-    marginTop: 16,
+    marginTop: 14,
     rowGap: 10,
     columnGap: 14
   },
@@ -127,16 +132,16 @@ const styles = StyleSheet.create({
     marginRight: 8 
   },
   legendTxt: { 
-    color: '#F8FAFC', 
+    color: '#334155', 
     fontSize: 12, 
-    fontWeight: '600',
+    fontWeight: '600', 
     letterSpacing: -0.1,
     marginRight: 6,
     flexShrink: 1
   },
   percentageTxt: {
-    color: '#38BDF8', 
-    fontWeight: '700',
+    color: '#059669', 
+    fontWeight: '800',
     fontSize: 12,
     fontVariant: ['tabular-nums']
   }
