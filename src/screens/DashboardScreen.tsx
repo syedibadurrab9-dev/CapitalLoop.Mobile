@@ -25,6 +25,9 @@ import { AssetSummaryCard } from '../components/AssetSummaryCard';
 import { PortfolioChart } from '../components/PortfolioChart'; 
 import { ActionButton } from '../components/ActionButton';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { InstitutionalHeader } from '../components/InstitutionalHeader';
+import { BottomNavBar, TabRouteName } from '../components/BottomNavBar';
+import { LeftDrawer } from '../components/LeftDrawer';
 
 const { width } = Dimensions.get('window');
 
@@ -32,6 +35,7 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
   const dispatch = useDispatch<AppDispatch>();
   const [paywall, setPaywall] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
   const { 
     assets, 
@@ -73,9 +77,30 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
   }, [user.token]);
 
   const firstName = (user.name || 'Investor').split(' ')[0];
+  const initials = (user.name || 'Investor')
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <View style={styles.wrapper}>
+      {/* Institutional Top Header */}
+      <InstitutionalHeader
+        title="CAPITAL LOOP"
+        onOpenDrawer={() => setIsDrawerOpen(true)}
+        onOpenProfile={() => navigation.navigate('Profile')}
+      />
+
+      {/* Slide-out Left Navigation Drawer */}
+      <LeftDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onNavigate={(route) => navigation.navigate(route)}
+        currentRoute="Dashboard"
+      />
+
       {/* Real-time Streaming Ticker Telemetry Strip */}
       <TickerTapeBar gold={goldPricePKR} silver={silverPricePKR} />
       
@@ -97,10 +122,19 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
           </View>
 
           {/* Top Profile Action Cluster */}
-          <View style={styles.heroTopRow}>
+          <TouchableOpacity 
+            style={styles.heroTopRow}
+            onPress={() => navigation.navigate('Profile')}
+            activeOpacity={0.8}
+          >
+            <View style={styles.heroAvatarCircle}>
+              <Text style={styles.heroAvatarInitials}>{initials}</Text>
+              <View style={styles.heroAvatarCheckDot} />
+            </View>
+
             <View style={styles.greetingCol}>
               <Text style={styles.greetingTitle}>Hi, {firstName}!</Text>
-              <Text style={styles.greetingSubtitle}>Here's Your Portfolio.</Text>
+              <Text style={styles.greetingSubtitle}>SBP Tier-1 Investor • View Profile ➔</Text>
             </View>
 
             <View style={styles.heroRightActions}>
@@ -119,17 +153,8 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
                    user.kycStatus === 'Pending' ? '⏳ Review' : '⚠️ CNIC'}
                 </Text>
               </TouchableOpacity>
-
-              {/* Currency Switcher Pill */}
-              <TouchableOpacity 
-                style={styles.currencyTogglePill} 
-                onPress={() => dispatch(toggleCurrency())}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.currencyToggleText}>{currencyToggle} ⇄</Text>
-              </TouchableOpacity>
             </View>
-          </View>
+          </TouchableOpacity>
 
           {/* Large Net Worth Display */}
           <View style={styles.balanceDisplayCard}>
@@ -345,6 +370,14 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
         
         <PaywallModal visible={paywall} onClose={() => setPaywall(false)} />
       </ScrollView>
+
+      {/* Persistent FinTech Bottom Navigation Bar */}
+      <BottomNavBar
+        activeRoute="Dashboard"
+        onNavigate={(route: TabRouteName) => navigation.navigate(route)}
+        unreadChatCount={0}
+        isAdvisorActive={true}
+      />
     </View>
   );
 }
@@ -391,9 +424,36 @@ const styles = StyleSheet.create({
   },
   heroTopRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 24,
+    gap: 12,
+  },
+  heroAvatarCircle: {
+    position: 'relative',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#1E293B',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#F59E0B',
+  },
+  heroAvatarInitials: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  heroAvatarCheckDot: {
+    position: 'absolute',
+    bottom: -1,
+    right: -1,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#10B981',
+    borderWidth: 2,
+    borderColor: '#0E141D',
   },
   greetingCol: {
     flex: 1,
@@ -474,6 +534,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     letterSpacing: -1,
     marginVertical: 8,
+    fontVariant: ['tabular-nums'],
   },
   invetoDualSplitRow: {
     flexDirection: 'row',
@@ -495,6 +556,7 @@ const styles = StyleSheet.create({
     color: '#F8FAFC',
     marginTop: 2,
     marginBottom: 6,
+    fontVariant: ['tabular-nums'],
   },
   mintIndicatorLine: {
     height: 3,
@@ -677,6 +739,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#FFFFFF',
     letterSpacing: -0.5,
+    fontVariant: ['tabular-nums'],
   },
   cardAssetSub: {
     fontSize: 10,

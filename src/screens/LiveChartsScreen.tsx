@@ -3,6 +3,10 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-nati
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { PortfolioChart } from '../components/PortfolioChart';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { InstitutionalHeader } from '../components/InstitutionalHeader';
+import { BottomNavBar, TabRouteName } from '../components/BottomNavBar';
+import { LeftDrawer } from '../components/LeftDrawer';
 
 interface MarketRecommendation {
   id: string;
@@ -98,9 +102,10 @@ const MARKET_RECOMMENDATIONS: MarketRecommendation[] = [
   }
 ];
 
-export default function LiveChartsScreen() {
+export default function LiveChartsScreen({ navigation }: NativeStackScreenProps<any>) {
   const assets = useSelector((state: RootState) => state.portfolio.assets);
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'PSX' | 'SUKUK' | 'GOLD'>('ALL');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const filteredRecs = MARKET_RECOMMENDATIONS.filter(item => {
     if (activeFilter === 'PSX') return item.assetClass === 'PSX Equities';
@@ -110,11 +115,28 @@ export default function LiveChartsScreen() {
   });
 
   return (
-    <ScrollView 
-      style={styles.container} 
-      showsVerticalScrollIndicator={false}
-      stickyHeaderIndices={[]}
-    >
+    <View style={styles.rootWrapper}>
+      {/* Institutional Top Header */}
+      <InstitutionalHeader
+        title="MARKET INTEL"
+        onOpenDrawer={() => setIsDrawerOpen(true)}
+        onOpenProfile={() => navigation.navigate('Profile')}
+      />
+
+      {/* Slide-out Left Navigation Drawer */}
+      <LeftDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onNavigate={(route) => navigation.navigate(route)}
+        currentRoute="LiveCharts"
+      />
+
+      <ScrollView 
+        style={styles.container} 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        stickyHeaderIndices={[]}
+      >
       {/* ==============================================================================
            HERO HEADER (OBSIDIAN INVETO ARCHITECTURE #0E141D)
            ============================================================================== */}
@@ -397,10 +419,26 @@ export default function LiveChartsScreen() {
 
       </View>
     </ScrollView>
-  );
+
+    {/* Persistent FinTech Bottom Navigation Bar */}
+    <BottomNavBar
+      activeRoute="LiveCharts"
+      onNavigate={(route: TabRouteName) => navigation.navigate(route)}
+      unreadChatCount={0}
+      isAdvisorActive={true}
+    />
+  </View>
+);
 }
 
 const styles = StyleSheet.create({
+  rootWrapper: {
+    flex: 1,
+    backgroundColor: '#0E141D',
+  },
+  scrollContent: {
+    paddingBottom: 20,
+  },
   container: { 
     flex: 1, 
     backgroundColor: '#0E141D',

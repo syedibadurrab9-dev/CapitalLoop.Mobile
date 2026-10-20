@@ -8,8 +8,12 @@ import { addNewAsset, linkBinanceWallet, clearSliceErrors } from '../store/portf
 import { requestCameraPermission, setScannerState } from '../store/cameraSlice';
 import { CustomInput } from '../components/CustomInput';
 import { ActionButton } from '../components/ActionButton';
+import { InstitutionalHeader } from '../components/InstitutionalHeader';
+import { BottomNavBar, TabRouteName } from '../components/BottomNavBar';
+import { LeftDrawer } from '../components/LeftDrawer';
 
 export default function AssetInputScreen({ navigation }: NativeStackScreenProps<any>) {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
 
   // --- STATE REGISTRY EXTRACTION CONSOLE ---
@@ -134,7 +138,23 @@ export default function AssetInputScreen({ navigation }: NativeStackScreenProps<
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+    <View style={styles.rootWrapper}>
+      {/* Institutional Top Header */}
+      <InstitutionalHeader
+        title="ASSET VAULT"
+        onOpenDrawer={() => setIsDrawerOpen(true)}
+        onOpenProfile={() => navigation.navigate('Profile')}
+      />
+
+      {/* Slide-out Left Navigation Drawer */}
+      <LeftDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onNavigate={(route) => navigation.navigate(route)}
+        currentRoute="AssetInput"
+      />
+
+      <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
       <Text style={styles.title}>Add Asset</Text>
       <Text style={styles.sub}>Choose a tracking method to securely log your capital holdings.</Text>
 
@@ -216,10 +236,23 @@ export default function AssetInputScreen({ navigation }: NativeStackScreenProps<
         </View>
       )}
     </ScrollView>
+
+      {/* Persistent FinTech Bottom Navigation Bar */}
+      <BottomNavBar
+        activeRoute="AssetInput"
+        onNavigate={(route: TabRouteName) => navigation.navigate(route)}
+        unreadChatCount={0}
+        isAdvisorActive={true}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  rootWrapper: {
+    flex: 1,
+    backgroundColor: '#F1F5F9',
+  },
   container: { 
     flex: 1, 
     backgroundColor: '#F1F5F9' /* Premium soft light grey slate base */

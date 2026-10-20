@@ -16,9 +16,14 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { RootState, AppDispatch } from '../store';
 import { submitKycVerification } from '../store/portfolioSlice';
 import { ActionButton } from '../components/ActionButton';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { InstitutionalHeader } from '../components/InstitutionalHeader';
+import { BottomNavBar, TabRouteName } from '../components/BottomNavBar';
+import { LeftDrawer } from '../components/LeftDrawer';
 
-export default function KycScreen(): React.JSX.Element {
+export default function KycScreen({ navigation }: NativeStackScreenProps<any>): React.JSX.Element {
   const dispatch = useDispatch<AppDispatch>();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const kycStatus = useSelector((state: RootState) => state.portfolio.user.kycStatus);
   const isLoading = useSelector((state: RootState) => state.portfolio.isLoading);
 
@@ -223,11 +228,27 @@ export default function KycScreen(): React.JSX.Element {
   const statusInfo = getStatusCardStyles();
 
   return (
-    <ScrollView
-      style={styles.canvas}
-      contentContainerStyle={styles.scrollContent}
-      keyboardShouldPersistTaps="handled"
-    >
+    <View style={styles.rootWrapper}>
+      <InstitutionalHeader
+        title="NADRA BIO-KYC"
+        showBack={true}
+        onBack={() => navigation.goBack()}
+        onOpenDrawer={() => setIsDrawerOpen(true)}
+        onOpenProfile={() => navigation.navigate('Profile')}
+      />
+
+      <LeftDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onNavigate={(route) => navigation.navigate(route)}
+        currentRoute="KycRoute"
+      />
+
+      <ScrollView
+        style={styles.canvas}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
       <View>
         <Text style={styles.title}>Identity Compliance</Text>
         <Text style={styles.sub}>
@@ -425,11 +446,24 @@ export default function KycScreen(): React.JSX.Element {
           </View>
         </View>
       </Modal>
-    </ScrollView>
+      </ScrollView>
+
+      {/* Persistent FinTech Bottom Navigation Bar */}
+      <BottomNavBar
+        activeRoute="Profile"
+        onNavigate={(route: TabRouteName) => navigation.navigate(route)}
+        unreadChatCount={0}
+        isAdvisorActive={true}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  rootWrapper: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+  },
   canvas: {
     flex: 1,
     backgroundColor: '#F8FAFC',

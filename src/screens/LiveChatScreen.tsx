@@ -17,6 +17,10 @@ import { PaywallModal } from '../components/PaywallModal';
 import { ChatBubble } from '../components/ChatBubble';
 import * as SignalR from '@microsoft/signalr';
 import { getApiBaseUrl } from '../services/gatewayService';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { InstitutionalHeader } from '../components/InstitutionalHeader';
+import { BottomNavBar, TabRouteName } from '../components/BottomNavBar';
+import { LeftDrawer } from '../components/LeftDrawer';
 
 const getBackendUrl = () => getApiBaseUrl();
 
@@ -32,7 +36,8 @@ interface AssignedAdvisorInfo {
   license?: string;
 }
 
-export default function LiveChatScreen() {
+export default function LiveChatScreen({ navigation }: NativeStackScreenProps<any>) {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const isPremium = useSelector((state: RootState) => state.portfolio.user.isPremiumUser);
   const userToken = useSelector((state: RootState) => state.portfolio.user.token);
 
@@ -159,11 +164,27 @@ export default function LiveChatScreen() {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'padding'} 
-      keyboardVerticalOffset={Platform.OS === 'android' ? 90 : 0} 
-    >
+    <View style={styles.rootWrapper}>
+      {/* Institutional Top Header */}
+      <InstitutionalHeader
+        title="ADVISORY DESK"
+        onOpenDrawer={() => setIsDrawerOpen(true)}
+        onOpenProfile={() => navigation.navigate('Profile')}
+      />
+
+      {/* Slide-out Left Navigation Drawer */}
+      <LeftDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onNavigate={(route) => navigation.navigate(route)}
+        currentRoute="LiveChat"
+      />
+
+      <KeyboardAvoidingView 
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0} 
+      >
       {!isPremium && (
         <TouchableOpacity style={styles.upgradeBanner} onPress={() => setPaywall(true)} activeOpacity={0.9}>
           <Text style={styles.upgradeText}>✨ Live Chat is locked. Tap here to unlock Premium Support.</Text>
@@ -281,10 +302,23 @@ export default function LiveChatScreen() {
 
       <PaywallModal visible={paywall} onClose={() => setPaywall(false)} />
     </KeyboardAvoidingView>
-  );
+
+    {/* Persistent FinTech Bottom Navigation Bar */}
+    <BottomNavBar
+      activeRoute="LiveChat"
+      onNavigate={(route: TabRouteName) => navigation.navigate(route)}
+      unreadChatCount={0}
+      isAdvisorActive={true}
+    />
+  </View>
+);
 }
 
 const styles = StyleSheet.create({
+  rootWrapper: {
+    flex: 1,
+    backgroundColor: '#0E141D',
+  },
   container: { 
     flex: 1, 
     backgroundColor: '#F1F5F9' /* Clean premium light grey slate canvas background */

@@ -18,6 +18,10 @@ import {
 } from '../store/portfolioSlice'; 
 import { ActionButton } from '../components/ActionButton';
 import { PaywallModal } from '../components/PaywallModal';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { InstitutionalHeader } from '../components/InstitutionalHeader';
+import { BottomNavBar, TabRouteName } from '../components/BottomNavBar';
+import { LeftDrawer } from '../components/LeftDrawer';
 
 interface QuestionDef {
   id: number;
@@ -89,8 +93,9 @@ const SECP_QUESTIONS: QuestionDef[] = [
   },
 ];
 
-export default function AiAdvisorScreen() {
+export default function AiAdvisorScreen({ navigation }: NativeStackScreenProps<any>) {
   const dispatch = useDispatch<AppDispatch>();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
   // Extract state flags from Redux
   const isPremium = useSelector((state: RootState) => state.portfolio.user.isPremiumUser);
@@ -183,11 +188,27 @@ export default function AiAdvisorScreen() {
   const profileColor = getProfileColor(suitabilityProfile?.riskProfile);
 
   return (
-    <ScrollView 
-      style={styles.container} 
-      contentContainerStyle={styles.content} 
-      showsVerticalScrollIndicator={false}
-    >
+    <View style={styles.rootWrapper}>
+      <InstitutionalHeader
+        title="SECP AI ADVISOR"
+        showBack={true}
+        onBack={() => navigation.goBack()}
+        onOpenDrawer={() => setIsDrawerOpen(true)}
+        onOpenProfile={() => navigation.navigate('Profile')}
+      />
+
+      <LeftDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        onNavigate={(route) => navigation.navigate(route)}
+        currentRoute="AiAdvisor"
+      />
+
+      <ScrollView 
+        style={styles.container} 
+        contentContainerStyle={styles.content} 
+        showsVerticalScrollIndicator={false}
+      >
       <Text style={styles.title}>SECP AI Advisor</Text>
       <Text style={styles.sub}>
         Automated regulatory suitability profiling, concentration risk audits, and 2026 SECP Sandbox hard allocation caps.
@@ -464,10 +485,23 @@ export default function AiAdvisorScreen() {
 
       <PaywallModal visible={paywall} onClose={() => setPaywall(false)} />
     </ScrollView>
-  );
+
+    {/* Persistent FinTech Bottom Navigation Bar */}
+    <BottomNavBar
+      activeRoute="Profile"
+      onNavigate={(route: TabRouteName) => navigation.navigate(route)}
+      unreadChatCount={0}
+      isAdvisorActive={true}
+    />
+  </View>
+);
 }
 
 const styles = StyleSheet.create({
+  rootWrapper: {
+    flex: 1,
+    backgroundColor: '#F1F5F9',
+  },
   container: { 
     flex: 1, 
     backgroundColor: '#F1F5F9' 

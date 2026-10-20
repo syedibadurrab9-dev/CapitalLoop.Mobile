@@ -15,6 +15,7 @@ import LiveChartsScreen from '../screens/LiveChartsScreen';
 import AiAdvisorScreen from '../screens/AiAdvisorScreen';
 import KycScreen from '../screens/KycScreen';
 import LiveChatScreen from '../screens/LiveChatScreen';
+import InvestorProfileScreen from '../screens/InvestorProfileScreen';
 
 // Declare explicit type bindings for navigation param mapping
 export type RootStackParamList = {
@@ -26,6 +27,7 @@ export type RootStackParamList = {
   AiAdvisor: undefined;
   KycRoute: undefined;
   LiveChat: undefined;
+  Profile: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -37,16 +39,12 @@ export default function AppNavigator() {
   return (
     <>
       {/* Dynamic light theme system bar tracking layer */}
-      <StatusBar style="dark" animated={true} />
+      <StatusBar style="light" animated={true} />
 
       <Stack.Navigator 
         initialRouteName={!hasSeenOnboarding ? 'Onboarding' : 'Auth'}
         screenOptions={{ 
-          headerStyle: { backgroundColor: '#FFFFFF' },
-          headerTintColor: '#0F172A',
-          headerShadowVisible: true,
-          // 🚀 FIXED: Stripped of letterSpacing property fields to comply with Pick<TextStyle> navigation typings
-          headerTitleStyle: { fontWeight: '700', fontSize: 16 },
+          headerShown: false,
           animation: 'slide_from_right'
         }}
       >
@@ -65,7 +63,7 @@ export default function AppNavigator() {
             />
           </>
         ) : (
-          // Authenticated Secured Ledger Stack Nodes
+          // Authenticated Secured Institutional Stack Nodes
           <>
             <Stack.Screen 
               name="Dashboard" 
@@ -73,14 +71,24 @@ export default function AppNavigator() {
               options={{ title: 'CapitalLoop' }} 
             />
             <Stack.Screen 
+              name="LiveCharts" 
+              component={LiveChartsScreen} 
+              options={{ title: 'Market Analytics' }} 
+            />
+            <Stack.Screen 
               name="AssetInput" 
               component={AssetInputScreen} 
               options={{ title: 'Manage Assets' }} 
             />
             <Stack.Screen 
-              name="LiveCharts" 
-              component={LiveChartsScreen} 
-              options={{ title: 'Market Analytics' }} 
+              name="LiveChat" 
+              component={LiveChatScreen} 
+              options={{ title: 'Help & Support' }} 
+            />
+            <Stack.Screen 
+              name="Profile" 
+              component={InvestorProfileScreen} 
+              options={{ title: 'Investor Profile' }} 
             />
             <Stack.Screen 
               name="AiAdvisor" 
@@ -91,11 +99,6 @@ export default function AppNavigator() {
               name="KycRoute" 
               component={KycScreen} 
               options={{ title: 'Verify Identity' }} 
-            />
-            <Stack.Screen 
-              name="LiveChat" 
-              component={LiveChatScreen} 
-              options={{ title: 'Help & Support' }} 
             />
           </>
         )}
