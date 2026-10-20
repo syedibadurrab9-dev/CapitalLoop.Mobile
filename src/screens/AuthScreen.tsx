@@ -174,15 +174,15 @@ export default function AuthScreen({ navigation }: NativeStackScreenProps<any>):
     try {
       setLoading(true);
 
-      // 1. Verify Google Play Services is available on device
-      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-
-      // 2. Explicitly re-apply configure so native _apiClient is guaranteed initialized
+      // 1. Explicitly configure FIRST so native _apiClient is guaranteed initialized
       GoogleSignin.configure({
         webClientId: WEB_CLIENT_ID,
         offlineAccess: true,
         forceCodeForRefreshToken: true,
       });
+
+      // 2. Verify Google Play Services is available on device
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
 
       // 3. Clear any lingering session
       try {
