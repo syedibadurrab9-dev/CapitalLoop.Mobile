@@ -318,17 +318,20 @@ export default function AuthScreen({ navigation }: NativeStackScreenProps<any>):
       <StatusBar barStyle="dark-content" backgroundColor="#F1F5F9" />
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Brand Header */}
+        {/* Sovereign Brand Header */}
         <View style={styles.logoGroup}>
+          <View style={styles.sovHeaderPill}>
+            <Text style={styles.sovHeaderPillText}>🇵🇰 ISLAMIC REPUBLIC OF PAKISTAN</Text>
+          </View>
           <View style={styles.logoIcon}>
             <Text style={styles.txtIcon}>♾️</Text>
           </View>
           <Text style={styles.brandTitle}>CapitalLoop</Text>
           <Text style={styles.brandTag}>
-            Pakistan's Premier Multi-Asset Wealth Sovereign Ledger
+            State Bank of Pakistan & SECP Regulated Multi-Asset Sovereign Wealth Platform
           </Text>
           <View style={styles.secpBadge}>
-            <Text style={styles.secpBadgeText}>🛡️ SECP FinTech Sandbox Regulated</Text>
+            <Text style={styles.secpBadgeText}>🏛️ SBP BPRD/2026 • 🛡️ SECP Sandbox #FS-2026-084</Text>
           </View>
         </View>
 
@@ -520,7 +523,7 @@ export default function AuthScreen({ navigation }: NativeStackScreenProps<any>):
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: '#06090F',
   },
   scrollContent: {
     flexGrow: 1,
@@ -533,21 +536,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 40,
   },
+  sovHeaderPill: {
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.25)',
+    marginBottom: 20,
+  },
+  sovHeaderPillText: {
+    color: '#34D399',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+  },
   logoIcon: {
     width: 88,
     height: 88,
     borderRadius: 24,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#0D1524',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
     marginBottom: 20,
-    shadowColor: '#0F172A',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.3,
     shadowRadius: 10,
-    elevation: 2,
+    elevation: 4,
   },
   txtIcon: {
     fontSize: 38,
@@ -555,38 +573,39 @@ const styles = StyleSheet.create({
   brandTitle: {
     fontSize: 32,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#F8FAFC',
     letterSpacing: -0.5,
   },
   brandTag: {
-    fontSize: 14,
-    color: '#64748B',
+    fontSize: 13,
+    color: '#94A3B8',
     marginTop: 8,
     textAlign: 'center',
     letterSpacing: -0.1,
-    maxWidth: 280,
+    maxWidth: 290,
   },
   secpBadge: {
     marginTop: 14,
-    backgroundColor: '#EFF6FF',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#BFDBFE',
+    borderColor: 'rgba(16, 185, 129, 0.25)',
   },
   secpBadgeText: {
     fontSize: 11,
-    color: '#1D4ED8',
-    fontWeight: '600',
+    color: '#34D399',
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
   btnGroup: {
     width: '100%',
     marginBottom: 16,
   },
   footerNotice: {
-    color: '#94A3B8',
-    fontSize: 12,
+    color: '#64748B',
+    fontSize: 11,
     textAlign: 'center',
     marginTop: 16,
     fontWeight: '500',
@@ -599,61 +618,62 @@ const styles = StyleSheet.create({
   sandboxToggleText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#64748B',
+    color: '#94A3B8',
   },
   sandboxCard: {
     marginTop: 12,
     padding: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#0D1524',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   sandboxTitle: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#0F172A',
+    color: '#F8FAFC',
   },
   sandboxSubtitle: {
     fontSize: 11,
-    color: '#64748B',
+    color: '#94A3B8',
     marginTop: 2,
     marginBottom: 12,
   },
   sandboxBtn: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 8,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   sandboxBtnText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#1E293B',
+    color: '#F8FAFC',
     textAlign: 'center',
   },
   sandboxBtnVip: {
-    backgroundColor: '#FEF3C7',
-    borderColor: '#FDE68A',
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    borderColor: 'rgba(245, 158, 11, 0.3)',
   },
   sandboxBtnVipText: {
-    color: '#92400E',
+    color: '#FBBF24',
+    fontWeight: '700',
   },
   gatewayCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#0D1524',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
     padding: 12,
     marginBottom: 16,
-    shadowColor: '#0F172A',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
+    shadowOpacity: 0.2,
     shadowRadius: 6,
-    elevation: 1,
+    elevation: 2,
   },
   gatewayHeader: {
     flexDirection: 'row',

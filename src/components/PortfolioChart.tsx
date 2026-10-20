@@ -2,8 +2,8 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { AssetNode } from '../store/portfolioSlice';
 
-// Core light-mode color system aligned across the dashboard chart matrices
-const CHART_COLORS = ['#2563EB', '#10B981', '#F59E0B', '#0EA5E9', '#EC4899', '#8B5CF6'];
+// Sovereign palette matching institutional asset classes
+const CHART_COLORS = ['#10B981', '#F59E0B', '#38BDF8', '#8B5CF6', '#EC4899', '#14B8A6'];
 
 export const PortfolioChart = ({ assets }: { assets: AssetNode[] }) => {
   // Aggregate absolute overall portfolio value in localized PKR
@@ -11,7 +11,10 @@ export const PortfolioChart = ({ assets }: { assets: AssetNode[] }) => {
   
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Asset Allocation</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>Asset Allocation Breakdown</Text>
+        <Text style={styles.badge}>SECP DIVERSIFIED</Text>
+      </View>
       
       {/* Structural Distribution Bar Stack */}
       <View style={styles.barContainer}>
@@ -43,7 +46,6 @@ export const PortfolioChart = ({ assets }: { assets: AssetNode[] }) => {
             <View key={asset.id} style={styles.legendItem}>
               <View style={[styles.dot, { backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }]} />
               
-              {/* 🚀 FIXED: Dynamic flex-shrink layout allows text to utilize maximum space without cutting off early */}
               <Text style={styles.legendTxt} numberOfLines={1}>
                 {asset.name}
               </Text>
@@ -61,33 +63,45 @@ export const PortfolioChart = ({ assets }: { assets: AssetNode[] }) => {
 
 const styles = StyleSheet.create({
   container: { 
-    backgroundColor: '#FFFFFF', 
-    padding: 24, 
-    borderRadius: 24, 
+    backgroundColor: '#0D1524', 
+    padding: 22, 
+    borderRadius: 20, 
     borderWidth: 1, 
-    borderColor: '#E2E8F0', 
-    marginVertical: 16,
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 10,
-    elevation: 2
+    borderColor: 'rgba(255, 255, 255, 0.08)', 
+    marginVertical: 14,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
   },
   title: { 
-    fontSize: 14, 
+    fontSize: 12, 
     fontWeight: '700', 
-    color: '#334155', 
-    letterSpacing: -0.2, 
-    marginBottom: 16 
+    color: '#94A3B8', 
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  badge: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#34D399',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.25)',
   },
   barContainer: { 
-    height: 14, 
+    height: 12, 
     width: '100%', 
-    backgroundColor: '#F1F5F9', 
-    borderRadius: 7, 
+    backgroundColor: '#06090F', 
+    borderRadius: 6, 
     flexDirection: 'row', 
     overflow: 'hidden',
-    gap: 1 
+    gap: 1.5 
   },
   segment: { 
     height: '100%' 
@@ -95,14 +109,13 @@ const styles = StyleSheet.create({
   legendRow: { 
     flexDirection: 'row', 
     flexWrap: 'wrap', 
-    marginTop: 18,
-    rowGap: 12,
-    columnGap: 16 /* Generates premium negative space gaps between wrapped legend items */
+    marginTop: 16,
+    rowGap: 10,
+    columnGap: 14
   },
   legendItem: { 
     flexDirection: 'row', 
     alignItems: 'center',
-    // 🚀 FIXED: Dynamic width behavior lets items size themselves gracefully based on layout density
     minWidth: '45%',
     maxWidth: '100%',
     paddingVertical: 2
@@ -114,16 +127,15 @@ const styles = StyleSheet.create({
     marginRight: 8 
   },
   legendTxt: { 
-    color: '#475569', 
+    color: '#F8FAFC', 
     fontSize: 12, 
     fontWeight: '600',
     letterSpacing: -0.1,
     marginRight: 6,
-    // 🚀 FIXED: Safely compresses text labels to allow adjacent percentage metrics to render flawlessly
     flexShrink: 1
   },
   percentageTxt: {
-    color: '#2563EB', 
+    color: '#38BDF8', 
     fontWeight: '700',
     fontSize: 12,
     fontVariant: ['tabular-nums']

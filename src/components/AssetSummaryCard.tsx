@@ -62,6 +62,25 @@ export const AssetSummaryCard = ({
     }
   };
 
+  const getCategoryTheme = (cat: string) => {
+    const upper = cat.toUpperCase();
+    if (upper.includes('EQUITY') || upper.includes('STOCK')) {
+      return { icon: '📊', label: 'PSX Equity', tagBg: 'rgba(16, 185, 129, 0.12)', tagTxt: '#34D399', border: 'rgba(16, 185, 129, 0.25)' };
+    }
+    if (upper.includes('GOLD') || upper.includes('COMMODITY') || upper.includes('BULLION')) {
+      return { icon: '🪙', label: 'Physical Gold', tagBg: 'rgba(245, 158, 11, 0.12)', tagTxt: '#FBBF24', border: 'rgba(245, 158, 11, 0.25)' };
+    }
+    if (upper.includes('REAL_ESTATE') || upper.includes('PROPERTY')) {
+      return { icon: '🏢', label: 'Real Estate', tagBg: 'rgba(239, 68, 68, 0.12)', tagTxt: '#F87171', border: 'rgba(239, 68, 68, 0.25)' };
+    }
+    if (upper.includes('FIXED') || upper.includes('SUKUK')) {
+      return { icon: '📜', label: 'Sukuk / T-Bill', tagBg: 'rgba(139, 92, 246, 0.12)', tagTxt: '#A78BFA', border: 'rgba(139, 92, 246, 0.25)' };
+    }
+    return { icon: '💵', label: cat.replace('_', ' '), tagBg: 'rgba(56, 189, 248, 0.12)', tagTxt: '#38BDF8', border: 'rgba(56, 189, 248, 0.25)' };
+  };
+
+  const catTheme = getCategoryTheme(category);
+
   return (
     <View style={styles.cardContainer}>
       {/* Top Asset Header Row */}
@@ -71,18 +90,25 @@ export const AssetSummaryCard = ({
         activeOpacity={isRealEstate ? 0.7 : 1}
       >
         <View style={styles.meta}>
-          <Text style={styles.title} numberOfLines={1}>{name}</Text>
+          <View style={styles.titleRow}>
+            <Text style={styles.assetIcon}>{catTheme.icon}</Text>
+            <Text style={styles.title} numberOfLines={1}>{name}</Text>
+          </View>
+
           <View style={styles.badgeRow}>
-            <Text style={styles.categoryTxt}>{category.replace('_', ' ')}</Text>
+            <View style={[styles.categoryBadge, { backgroundColor: catTheme.tagBg, borderColor: catTheme.border }]}>
+              <Text style={[styles.categoryTxt, { color: catTheme.tagTxt }]}>{catTheme.label}</Text>
+            </View>
+
             <View style={[
               styles.syncBadge,
               isAutoSynced ? styles.badgeAuto : styles.badgeManual,
             ]}>
               <Text style={[
                 styles.syncTxt,
-                { color: isAutoSynced ? '#059669' : '#475569' },
+                { color: isAutoSynced ? '#34D399' : '#94A3B8' },
               ]}>
-                {isAutoSynced ? 'Auto Synced' : 'Manual Ledger'}
+                {isAutoSynced ? '● PSX Live' : '○ Verified'}
               </Text>
             </View>
 
@@ -100,31 +126,31 @@ export const AssetSummaryCard = ({
           <Text style={styles.val}>{valueDisplay}</Text>
           {isRealEstate && (
             <Text style={styles.expandHint}>
-              {isExpanded ? '▲ Hide Milestones' : '▼ Track Plan'}
+              {isExpanded ? 'Hide ▲' : 'Schedule ▼'}
             </Text>
           )}
         </View>
       </TouchableOpacity>
 
-      {/* Real Estate Installment Progress Bar */}
+      {/* Real Estate Micro Progress Line */}
       {isRealEstate && (
         <View style={styles.progressBarTrack}>
-          <View style={[styles.progressBarFill, { width: `${Math.min(100, progressPercent)}%` }]} />
+          <View style={[styles.progressBarFill, { width: `${progressPercent}%` }]} />
         </View>
       )}
 
-      {/* Expanded Real Estate Telemetry & Slider Controls */}
+      {/* Expanded Real Estate Installment Manager */}
       {isRealEstate && isExpanded && (
         <View style={styles.telemetryPanel}>
           <View style={styles.sliderHeaderRow}>
-            <Text style={styles.sliderLabel}>Milestone Slider (Paid: {localPaid} of {total})</Text>
+            <Text style={styles.sliderLabel}>Installments Disbursed: {localPaid} of {total}</Text>
             <View style={styles.stepperCluster}>
               <TouchableOpacity
                 style={[styles.stepBtn, localPaid <= 0 && styles.stepBtnDisabled]}
                 onPress={() => handleStep(-1)}
                 disabled={localPaid <= 0}
               >
-                <Text style={styles.stepBtnTxt}>−</Text>
+                <Text style={styles.stepBtnTxt}>-</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.stepBtn, localPaid >= total && styles.stepBtnDisabled]}
@@ -136,7 +162,7 @@ export const AssetSummaryCard = ({
             </View>
           </View>
 
-          {/* Interactive Milestone Slider */}
+          {/* Interactive Installment Slider */}
           <Slider
             style={styles.slider}
             minimumValue={0}
@@ -145,28 +171,28 @@ export const AssetSummaryCard = ({
             value={localPaid}
             onValueChange={(val) => setLocalPaid(Math.round(val))}
             onSlidingComplete={handleSliderComplete}
-            minimumTrackTintColor="#2563EB"
-            maximumTrackTintColor="#CBD5E1"
-            thumbTintColor="#2563EB"
+            minimumTrackTintColor="#10B981"
+            maximumTrackTintColor="#1E293B"
+            thumbTintColor="#34D399"
           />
 
           {/* Cashflow Metrics Grid */}
           <View style={styles.metricsGrid}>
             <View style={styles.metricCell}>
               <Text style={styles.metricLabel}>Paid Equity</Text>
-              <Text style={styles.metricVal}>Rs. {holdingValuePKR.toLocaleString()}</Text>
+              <Text style={styles.metricVal}>₨ {holdingValuePKR.toLocaleString()}</Text>
             </View>
 
             <View style={styles.metricCell}>
               <Text style={styles.metricLabel}>Remaining Liability</Text>
-              <Text style={[styles.metricVal, { color: '#D97706' }]}>
-                Rs. {remainingLiability.toLocaleString()}
+              <Text style={[styles.metricVal, { color: '#FBBF24' }]}>
+                ₨ {remainingLiability.toLocaleString()}
               </Text>
             </View>
 
             <View style={styles.metricCell}>
               <Text style={styles.metricLabel}>Est. Total Cost</Text>
-              <Text style={styles.metricVal}>Rs. {estimatedTotalCost.toLocaleString()}</Text>
+              <Text style={styles.metricVal}>₨ {estimatedTotalCost.toLocaleString()}</Text>
             </View>
           </View>
         </View>
@@ -177,77 +203,89 @@ export const AssetSummaryCard = ({
 
 const styles = StyleSheet.create({
   cardContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    backgroundColor: '#0D1524',
+    borderRadius: 18,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 10,
-    elevation: 2,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
     overflow: 'hidden',
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 18,
+    paddingHorizontal: 18,
+    paddingVertical: 16,
   },
   meta: {
     flex: 1,
-    paddingRight: 16,
+    paddingRight: 14,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  assetIcon: {
+    fontSize: 16,
   },
   title: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#0F172A',
+    color: '#F8FAFC',
     letterSpacing: -0.2,
+    flex: 1,
   },
   badgeRow: {
     flexDirection: 'row',
     alignItems: 'center',
     flexWrap: 'wrap',
     marginTop: 6,
-    gap: 8,
+    gap: 6,
+  },
+  categoryBadge: {
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
   },
   categoryTxt: {
-    fontSize: 11,
-    color: '#64748B',
-    fontWeight: '600',
+    fontSize: 10,
+    fontWeight: '700',
     textTransform: 'uppercase',
-    letterSpacing: 0.2,
+    letterSpacing: 0.3,
   },
   syncBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
   },
   badgeAuto: {
-    backgroundColor: '#E6F4EA',
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    borderColor: 'rgba(16, 185, 129, 0.25)',
   },
   badgeManual: {
-    backgroundColor: '#F1F5F9',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
   },
   syncTxt: {
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '600',
     letterSpacing: -0.1,
   },
   milestonePill: {
-    backgroundColor: '#EFF6FF',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
+    backgroundColor: 'rgba(56, 189, 248, 0.12)',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#BFDBFE',
+    borderColor: 'rgba(56, 189, 248, 0.25)',
   },
   milestoneTxt: {
     fontSize: 10,
     fontWeight: '800',
-    color: '#1D4ED8',
+    color: '#38BDF8',
   },
   valContainer: {
     alignItems: 'flex-end',
@@ -255,41 +293,40 @@ const styles = StyleSheet.create({
   val: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#34D399',
     fontVariant: ['tabular-nums'],
   },
   expandHint: {
     fontSize: 10,
-    color: '#2563EB',
+    color: '#38BDF8',
     fontWeight: '700',
     marginTop: 4,
   },
   progressBarTrack: {
-    height: 4,
-    backgroundColor: '#F1F5F9',
+    height: 3,
+    backgroundColor: '#06090F',
     width: '100%',
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#2563EB',
-    borderRadius: 2,
+    backgroundColor: '#10B981',
   },
   telemetryPanel: {
     padding: 16,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#06090F',
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
+    borderTopColor: 'rgba(255, 255, 255, 0.06)',
   },
   sliderHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   sliderLabel: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#334155',
+    color: '#94A3B8',
   },
   stepperCluster: {
     flexDirection: 'row',
@@ -299,19 +336,19 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 8,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#0D1524',
     borderWidth: 1,
-    borderColor: '#CBD5E1',
+    borderColor: 'rgba(255, 255, 255, 0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   stepBtnDisabled: {
-    opacity: 0.4,
+    opacity: 0.3,
   },
   stepBtnTxt: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#F8FAFC',
     lineHeight: 18,
   },
   slider: {
@@ -322,17 +359,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#0D1524',
     padding: 12,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: 'rgba(255, 255, 255, 0.06)',
   },
   metricCell: {
     alignItems: 'center',
   },
   metricLabel: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '700',
     color: '#64748B',
     textTransform: 'uppercase',
@@ -340,7 +377,7 @@ const styles = StyleSheet.create({
   metricVal: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#0F172A',
+    color: '#F8FAFC',
     marginTop: 2,
     fontVariant: ['tabular-nums'],
   },

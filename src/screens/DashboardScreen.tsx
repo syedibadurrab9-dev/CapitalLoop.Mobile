@@ -66,13 +66,28 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
       >
         
         {/* ==============================================================================
+            SOVEREIGN REGULATORY TRUST HEADER
+           ============================================================================== */}
+        <View style={styles.sovereignHeader}>
+          <View style={styles.sovereignTitleRow}>
+            <Text style={styles.sovereignFlag}>🇵🇰</Text>
+            <Text style={styles.sovereignGovText}>ISLAMIC REPUBLIC OF PAKISTAN • FINTECH SANDBOX</Text>
+          </View>
+          <View style={styles.sovereignBadgeRow}>
+            <Text style={styles.sovBadge}>🏛️ SBP BPRD/2026</Text>
+            <Text style={styles.sovBadge}>🛡️ SECP FS-2026-084</Text>
+            <Text style={styles.sovBadge}>⚖️ FBR ATL</Text>
+          </View>
+        </View>
+
+        {/* ==============================================================================
             PORTFOLIO USER IDENTITY SECTION
            ============================================================================== */}
         <View style={styles.header}>
           <View style={styles.userInfoCol}>
             <View style={styles.roleTagRow}>
               <Text style={styles.roleTag}>
-                {user.role} • {user.isPremiumUser ? 'Wealth VIP' : 'Retail Standard'}
+                {user.role} • {user.isPremiumUser ? 'Accredited VIP' : 'Retail Standard'}
               </Text>
             </View>
             <Text style={styles.name}>{user.name}</Text>
@@ -95,7 +110,7 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
                 user.kycStatus === 'Approved' ? styles.kycTxtApproved :
                 user.kycStatus === 'Pending' ? styles.kycTxtPending : styles.kycTxtUnverified
               ]}>
-                {user.kycStatus === 'Approved' ? '✓ Verified' :
+                {user.kycStatus === 'Approved' ? '✓ NADRA Cleared' :
                  user.kycStatus === 'Pending' ? '⏳ Under Review' : '⚠️ Verify CNIC'}
               </Text>
             </TouchableOpacity>
@@ -109,9 +124,9 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
               onPress={() => !user.isPremiumUser && setPaywall(true)}
               activeOpacity={0.7}
             >
-              <View style={[styles.dot, { backgroundColor: user.isPremiumUser ? '#059669' : '#D97706' }]} />
-              <Text style={[styles.pillTxt, { color: user.isPremiumUser ? '#047857' : '#B45309' }]}>
-                {user.isPremiumUser ? 'Premium' : 'Upgrade'}
+              <View style={[styles.dot, { backgroundColor: user.isPremiumUser ? '#10B981' : '#F59E0B' }]} />
+              <Text style={[styles.pillTxt, { color: user.isPremiumUser ? '#34D399' : '#FBBF24' }]}>
+                {user.isPremiumUser ? 'VIP Active' : 'Upgrade'}
               </Text>
             </TouchableOpacity>
 
@@ -121,7 +136,7 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
               onPress={() => dispatch(clearAuth())}
               activeOpacity={0.7}
             >
-              <Text style={styles.logoutTxt}>🚪</Text>
+              <Text style={styles.logoutTxt}>🚪 Exit</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -130,17 +145,28 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
             CONSOLIDATED ASSET EQUITY LEDGER DISPLAY NODE
            ============================================================================== */}
         <View style={styles.worthCard}>
-          <View style={styles.worthRow}>
-            <Text style={styles.worthLabel}>Total Net Worth</Text>
+          <View style={styles.worthHeaderRow}>
+            <View>
+              <Text style={styles.worthLabel}>CONSOLIDATED NET WORTH</Text>
+              <Text style={styles.worthSublabel}>SBP Non-Custodial Multi-Asset Vault</Text>
+            </View>
             <TouchableOpacity 
               style={styles.currPill} 
               onPress={() => dispatch(toggleCurrency())}
               activeOpacity={0.7}
             >
-              <Text style={styles.currTxt}>{currencyToggle}</Text>
+              <Text style={styles.currTxt}>{currencyToggle} ⇄</Text>
             </TouchableOpacity>
           </View>
+
           <Text style={styles.worthValue}>{displayNetWorth()}</Text>
+
+          <View style={styles.worthFooterRow}>
+            <View style={styles.deltaPill}>
+              <Text style={styles.deltaTxt}>▲ +2.4% Today</Text>
+            </View>
+            <Text style={styles.deltaNote}>PSX & Sarafa Real-time Valuation</Text>
+          </View>
         </View>
 
         {/* Dynamic Multi-Asset Density Bar Visualizer Matrix */}
@@ -149,16 +175,19 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
         {/* ==============================================================================
             EXECUTIVE CONTROL OPERATIONS WORKSPACE NAVIGATION GRID
            ============================================================================== */}
-        <Text style={styles.sectionHeader}>Quick Actions</Text>
+        <Text style={styles.sectionHeader}>Institutional Operations</Text>
         <View style={styles.grid}>
           
-          {/* SYNC HUB */}
+          {/* MANAGE ASSETS */}
           <Pressable 
             style={({ pressed }) => [styles.gridCell, pressed && styles.gridCellPressed]} 
             onPress={() => navigation.navigate('AssetInput')}
           >
-            <View style={styles.iconCircle}><Text style={styles.cellIcon}>📝</Text></View>
+            <View style={styles.iconCircle}>
+              <Text style={styles.cellIcon}>📊</Text>
+            </View>
             <Text style={styles.cellTxt}>Manage Assets</Text>
+            <Text style={styles.cellSubtxt}>PSX, Sukuk, Bullion</Text>
           </Pressable>
           
           {/* AUTO API SYNC */}
@@ -169,14 +198,15 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
           >
             <View style={[styles.iconCircle, isSyncing && styles.iconCircleActive]}>
               {isSyncing ? (
-                <ActivityIndicator size="small" color="#2563EB" />
+                <ActivityIndicator size="small" color="#10B981" />
               ) : (
                 <Text style={styles.cellIcon}>🔄</Text>
               )}
             </View>
             <Text style={[styles.cellTxt, isSyncing && styles.cellTxtActive]}>
-              {isSyncing ? 'Syncing...' : 'Live Sync'}
+              {isSyncing ? 'Syncing...' : 'SBP Live Sync'}
             </Text>
+            <Text style={styles.cellSubtxt}>50ms Telemetry</Text>
           </Pressable>
           
           {/* LIVE CHARTS */}
@@ -184,8 +214,11 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
             style={({ pressed }) => [styles.gridCell, pressed && styles.gridCellPressed]} 
             onPress={() => user.isPremiumUser ? navigation.navigate('LiveCharts') : setPaywall(true)}
           >
-            <View style={styles.iconCircle}><Text style={styles.cellIcon}>📈</Text></View>
-            <Text style={styles.cellTxt}>Market Analytics</Text>
+            <View style={styles.iconCircle}>
+              <Text style={styles.cellIcon}>📈</Text>
+            </View>
+            <Text style={styles.cellTxt}>Market Terminal</Text>
+            <Text style={styles.cellSubtxt}>KSE-100 & Sarafa</Text>
           </Pressable>
           
           {/* AI ADVISOR */}
@@ -193,8 +226,11 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
             style={({ pressed }) => [styles.gridCell, pressed && styles.gridCellPressed]} 
             onPress={() => navigation.navigate('AiAdvisor')}
           >
-            <View style={styles.iconCircle}><Text style={styles.cellIcon}>🤖</Text></View>
-            <Text style={styles.cellTxt}>AI Insights</Text>
+            <View style={styles.iconCircle}>
+              <Text style={styles.cellIcon}>🤖</Text>
+            </View>
+            <Text style={styles.cellTxt}>AI Wealth Advisor</Text>
+            <Text style={styles.cellSubtxt}>SECP Rebalancing</Text>
           </Pressable>
           
           {/* KYC PORTAL */}
@@ -202,8 +238,11 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
             style={({ pressed }) => [styles.gridCell, pressed && styles.gridCellPressed]} 
             onPress={() => navigation.navigate('KycRoute')}
           >
-            <View style={styles.iconCircle}><Text style={styles.cellIcon}>🆔</Text></View>
-            <Text style={styles.cellTxt}>Verify Identity</Text>
+            <View style={styles.iconCircle}>
+              <Text style={styles.cellIcon}>🆔</Text>
+            </View>
+            <Text style={styles.cellTxt}>NADRA Bio-KYC</Text>
+            <Text style={styles.cellSubtxt}>Investor Tier Limits</Text>
           </Pressable>
           
           {/* SUPPORT HUB */}
@@ -211,8 +250,11 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
             style={({ pressed }) => [styles.gridCell, pressed && styles.gridCellPressed]} 
             onPress={() => navigation.navigate('LiveChat')}
           >
-            <View style={styles.iconCircle}><Text style={styles.cellIcon}>💬</Text></View>
-            <Text style={styles.cellTxt}>Help & Support</Text>
+            <View style={styles.iconCircle}>
+              <Text style={styles.cellIcon}>💬</Text>
+            </View>
+            <Text style={styles.cellTxt}>Institutional Desk</Text>
+            <Text style={styles.cellSubtxt}>SECP Compliance</Text>
           </Pressable>
         </View>
 
@@ -220,8 +262,8 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
             DYNAMIC STREAM ITEMIZED POSITIONS TRACK
            ============================================================================== */}
         <View style={styles.listHeaderRow}>
-          <Text style={styles.listHeader}>Your Asset Distribution</Text>
-          <Text style={styles.listCount}>{assets.length} Active</Text>
+          <Text style={styles.listHeader}>Regulated Asset Allocation</Text>
+          <Text style={styles.listCount}>{assets.length} Active Positions</Text>
         </View>
 
         {assets.map((asset) => (
@@ -248,7 +290,7 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
 
         {/* Session Disconnection Lifecycle Controller */}
         <View style={styles.spacing}>
-          <ActionButton title="Log Out of Enterprise Session" onPress={() => { dispatch(clearAuth()); }} variant="danger" />
+          <ActionButton title="Log Out of Secure Session" onPress={() => { dispatch(clearAuth()); }} variant="danger" />
         </View>
         
         <PaywallModal visible={paywall} onClose={() => setPaywall(false)} />
@@ -260,21 +302,60 @@ export default function DashboardScreen({ navigation }: NativeStackScreenProps<a
 const styles = StyleSheet.create({
   wrapper: { 
     flex: 1, 
-    backgroundColor: '#F1F5F9' /* Clean frosted ice sheet canvas background */
+    backgroundColor: '#06090F' /* Sovereign Obsidian Canvas */
   },
   container: { 
     flex: 1 
   },
   content: { 
-    paddingHorizontal: 20, 
-    paddingTop: 24, 
+    paddingHorizontal: 18, 
+    paddingTop: 16, 
     paddingBottom: 40 
+  },
+  sovereignHeader: {
+    backgroundColor: '#0D1524',
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    marginBottom: 16,
+  },
+  sovereignTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 6,
+  },
+  sovereignFlag: {
+    fontSize: 14,
+  },
+  sovereignGovText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#34D399',
+    letterSpacing: 0.8,
+  },
+  sovereignBadgeRow: {
+    flexDirection: 'row',
+    gap: 6,
+    flexWrap: 'wrap',
+  },
+  sovBadge: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#94A3B8',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
   },
   header: { 
     flexDirection: 'row', 
     justifyContent: 'space-between', 
     alignItems: 'flex-start', 
-    marginBottom: 24 
+    marginBottom: 20 
   },
   userInfoCol: {
     flex: 1,
@@ -284,28 +365,23 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   roleTag: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#2563EB',
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#10B981',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  welcome: { 
-    fontSize: 12, 
-    color: '#64748B', 
-    fontWeight: '600', 
-    letterSpacing: 0.1
+    letterSpacing: 0.6,
   },
   name: { 
     fontSize: 22, 
     fontWeight: '800', 
-    color: '#0F172A',
+    color: '#F8FAFC',
     letterSpacing: -0.5 
   },
   userEmail: {
     fontSize: 11,
-    color: '#64748B',
-    marginTop: 1,
+    color: '#94A3B8',
+    marginTop: 2,
+    fontFamily: 'monospace',
   },
   headerActionCluster: {
     flexDirection: 'column',
@@ -313,63 +389,65 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   kycPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
     borderWidth: 1,
   },
   kycApproved: {
-    backgroundColor: '#ECFDF5',
-    borderColor: '#A7F3D0',
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    borderColor: 'rgba(16, 185, 129, 0.3)',
   },
   kycPending: {
-    backgroundColor: '#FFFBEB',
-    borderColor: '#FDE68A',
+    backgroundColor: 'rgba(245, 158, 11, 0.15)',
+    borderColor: 'rgba(245, 158, 11, 0.3)',
   },
   kycUnverified: {
-    backgroundColor: '#FEF2F2',
-    borderColor: '#FECACA',
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+    borderColor: 'rgba(239, 68, 68, 0.3)',
   },
   kycTxt: {
     fontSize: 10,
     fontWeight: '700',
   },
   kycTxtApproved: {
-    color: '#059669',
+    color: '#34D399',
   },
   kycTxtPending: {
-    color: '#D97706',
+    color: '#FBBF24',
   },
   kycTxtUnverified: {
-    color: '#DC2626',
+    color: '#F87171',
   },
   logoutBtn: {
-    padding: 6,
-    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    marginTop: 2,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   logoutTxt: {
-    fontSize: 12,
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#94A3B8',
   },
   pill: { 
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10, 
-    paddingVertical: 5, 
-    borderRadius: 14, 
+    paddingHorizontal: 8, 
+    paddingVertical: 3, 
+    borderRadius: 8, 
     borderWidth: 1, 
-    gap: 5
+    gap: 4
   },
   pillPro: {
-    backgroundColor: '#E6F4EA', 
-    borderColor: '#A7F3D0'
+    backgroundColor: 'rgba(16, 185, 129, 0.12)', 
+    borderColor: 'rgba(16, 185, 129, 0.3)'
   },
   pillUpgrade: {
-    backgroundColor: '#FFFBEB', 
-    borderColor: '#FDE68A'
+    backgroundColor: 'rgba(245, 158, 11, 0.12)', 
+    borderColor: 'rgba(245, 158, 11, 0.3)'
   },
   dot: {
     width: 6,
@@ -377,137 +455,169 @@ const styles = StyleSheet.create({
     borderRadius: 3
   },
   pillTxt: { 
-    fontSize: 11, 
+    fontSize: 10, 
     fontWeight: '700'
   },
   worthCard: { 
-    backgroundColor: '#FFFFFF', 
-    padding: 26, 
-    borderRadius: 24, 
+    backgroundColor: '#0D1524', 
+    padding: 22, 
+    borderRadius: 20, 
     borderWidth: 1, 
-    borderColor: '#E2E8F0', 
-    marginBottom: 28,
-    shadowColor: '#0F172A',
+    borderColor: 'rgba(255, 255, 255, 0.08)', 
+    marginBottom: 20,
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.3,
     shadowRadius: 16,
-    elevation: 3
+    elevation: 4
   },
-  worthRow: { 
+  worthHeaderRow: { 
     flexDirection: 'row', 
     justifyContent: 'space-between', 
-    alignItems: 'center' 
+    alignItems: 'flex-start' 
   },
   worthLabel: { 
-    fontSize: 12, 
-    color: '#475569', 
-    fontWeight: '600'
+    fontSize: 11, 
+    color: '#94A3B8', 
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  worthSublabel: {
+    fontSize: 10,
+    color: '#64748B',
+    marginTop: 2,
   },
   currPill: { 
-    backgroundColor: '#F8FAFC', 
-    paddingHorizontal: 12, 
-    paddingVertical: 6, 
-    borderRadius: 10,
+    backgroundColor: 'rgba(16, 185, 129, 0.12)', 
+    paddingHorizontal: 10, 
+    paddingVertical: 5, 
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#E2E8F0'
+    borderColor: 'rgba(16, 185, 129, 0.25)'
   },
   currTxt: { 
-    color: '#2563EB', /* Bold institutional tech sapphire blue */
+    color: '#34D399',
     fontSize: 11, 
     fontWeight: '800',
     letterSpacing: 0.5
   },
   worthValue: { 
-    fontSize: 36, 
+    fontSize: 34, 
     fontWeight: '800', 
-    color: '#0F172A', 
-    marginTop: 14, 
+    color: '#34D399', 
+    marginTop: 12, 
     letterSpacing: -0.5,
     fontVariant: ['tabular-nums']
   },
+  worthFooterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 10,
+  },
+  deltaPill: {
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+  },
+  deltaTxt: {
+    color: '#34D399',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  deltaNote: {
+    color: '#64748B',
+    fontSize: 11,
+  },
   sectionHeader: {
-    fontSize: 15, 
+    fontSize: 13, 
     fontWeight: '700', 
-    color: '#334155', 
-    marginBottom: 16, 
-    letterSpacing: -0.2
+    color: '#94A3B8', 
+    marginBottom: 12, 
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
   grid: { 
     flexDirection: 'row', 
     flexWrap: 'wrap', 
     justifyContent: 'space-between', 
-    marginBottom: 20 
+    marginBottom: 16 
   },
   gridCell: { 
     width: '48%', 
-    backgroundColor: '#FFFFFF', 
-    paddingVertical: 22,
-    paddingHorizontal: 16, 
-    borderRadius: 24, 
+    backgroundColor: '#0D1524', 
+    paddingVertical: 18,
+    paddingHorizontal: 14, 
+    borderRadius: 18, 
     alignItems: 'center', 
-    marginBottom: 14, 
+    marginBottom: 12, 
     borderWidth: 1, 
-    borderColor: '#E2E8F0',
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 2
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   gridCellPressed: {
-    backgroundColor: '#F8FAFC',
-    borderColor: '#CBD5E1'
+    backgroundColor: '#131E33',
+    borderColor: 'rgba(16, 185, 129, 0.35)',
   },
   iconCircle: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: '#F8FAFC',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
     borderWidth: 1,
-    borderColor: '#E2E8F0'
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   iconCircleActive: {
-    borderColor: '#2563EB',
-    backgroundColor: '#EFF6FF'
+    borderColor: '#10B981',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
   },
   cellIcon: { 
     fontSize: 18 
   },
   cellTxt: { 
-    color: '#334155', 
+    color: '#F8FAFC', 
     fontSize: 12, 
-    fontWeight: '600', 
+    fontWeight: '700', 
     textAlign: 'center' 
   },
+  cellSubtxt: {
+    color: '#64748B',
+    fontSize: 10,
+    marginTop: 2,
+    textAlign: 'center',
+  },
   cellTxtActive: {
-    color: '#2563EB'
+    color: '#10B981'
   },
   listHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
-    marginTop: 12
+    marginBottom: 14,
+    marginTop: 8
   },
   listHeader: { 
-    fontSize: 15, 
+    fontSize: 13, 
     fontWeight: '700', 
-    color: '#334155', 
-    letterSpacing: -0.2
+    color: '#94A3B8', 
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
   listCount: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
-    color: '#2563EB',
-    backgroundColor: '#EFF6FF',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    color: '#34D399',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: '#DBEAFE'
+    borderColor: 'rgba(16, 185, 129, 0.25)'
   },
   spacing: { 
     marginTop: 16 
