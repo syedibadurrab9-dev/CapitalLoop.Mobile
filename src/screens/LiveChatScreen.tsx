@@ -7,7 +7,7 @@ import {
   TouchableOpacity, 
   ScrollView, 
   Alert, 
-  ActivityIndicator,
+  ActivityIndicator, 
   KeyboardAvoidingView, 
   Platform 
 } from 'react-native';
@@ -26,6 +26,12 @@ interface MessageItem {
   side: 'user' | 'agent' | 'ai';
 }
 
+interface AssignedAdvisorInfo {
+  email: string;
+  name: string;
+  license?: string;
+}
+
 export default function LiveChatScreen() {
   const isPremium = useSelector((state: RootState) => state.portfolio.user.isPremiumUser);
   const userToken = useSelector((state: RootState) => state.portfolio.user.token);
@@ -36,6 +42,8 @@ export default function LiveChatScreen() {
   const [input, setInput] = useState('');
   const [paywall, setPaywall] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [assignedAdvisor, setAssignedAdvisor] = useState<AssignedAdvisorInfo | null>(null);
+  const [isAdvisorTyping, setIsAdvisorTyping] = useState<boolean>(false);
 
   const connectionRef = useRef<SignalR.HubConnection | null>(null);
   const scrollViewRef = useRef<ScrollView | null>(null);
@@ -59,10 +67,41 @@ export default function LiveChatScreen() {
 
     hubConnection.on("ReceiveAgentMessage", (agentEmail: string, messagePayload: string) => {
       console.log(`✉️ Direct message received from agent: ${agentEmail}`);
+      setIsAdvisorTyping(false);
       setMessages(prev => [
         ...prev, 
         { id: Math.random().toString(), text: messagePayload, side: 'agent' }
       ]);
+    });
+
+    hubConnection.on("AdvisorAssigned", (agentEmail: string, agentName: string, license: string) => {
+      console.log(`👨‍💼 Advisor assigned: ${agentName} (${agentEmail}, ${license})`);
+      setAssignedAdvisor({ email: agentEmail, name: agentName, license });
+      setMessages(prev => [
+        ...prev, 
+        { 
+          id: Math.random().toString(), 
+          text: `🛡️ Accredited Advisor ${agentName} (${license || 'SECP Verified'}) has connected to your session.`, 
+          side: 'ai' 
+        }
+      ]);
+    });
+
+    hubConnection.on("AdvisorReleased", () => {
+      console.log("ℹ️ Advisor released session to common pool.");
+      setAssignedAdvisor(null);
+      setMessages(prev => [
+        ...prev, 
+        { 
+          id: Math.random().toString(), 
+          text: `ℹ️ Your conversation is in the advisory pool. Next available consultant will answer.`, 
+          side: 'ai' 
+        }
+      ]);
+    });
+
+    hubConnection.on("UserTyping", (senderEmail: string, senderName: string, isTyping: boolean) => {
+      setIsAdvisorTyping(isTyping);
     });
 
     hubConnection.start()
@@ -138,6 +177,37 @@ export default function LiveChatScreen() {
         </View>
       )}
 
+      {/* Sovereign Advisor Channel Status Bar */}
+      {isPremium && !isConnecting && (
+        <View style={styles.advisorStatusBar}>
+          {assignedAdvisor ? (
+            <View style={styles.assignedAdvisorBox}>
+              <View style={styles.advisorAvatarCircle}>
+                <Text style={styles.advisorAvatarText}>👨‍💼</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={styles.advisorNameText}>{assignedAdvisor.name}</Text>
+                  <View style={styles.verifiedTag}>
+                    <Text style={styles.verifiedTagText}>SECP VERIFIED</Text>
+                  </View>
+                </View>
+                <Text style={styles.advisorLicenseText}>
+                  License: {assignedAdvisor.license || 'SECP-ADV-8492'} • Dedicated Channel
+                </Text>
+              </View>
+            </View>
+          ) : (
+            <View style={styles.poolStatusBox}>
+              <View style={styles.poolStatusDot} />
+              <Text style={styles.poolStatusText}>
+                Live Advisory Pool • Connected to CapitalLoop SECP Advisory Desk
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
+
       <ScrollView 
         ref={scrollViewRef}
         style={styles.scroller} 
@@ -149,6 +219,15 @@ export default function LiveChatScreen() {
           <ChatBubble key={msg.id} text={msg.text} side={msg.side} />
         ))}
       </ScrollView>
+
+      {/* Typing Indicator Bar */}
+      {isAdvisorTyping && (
+        <View style={styles.typingIndicatorBar}>
+          <Text style={styles.typingIndicatorText}>
+            ✍️ {assignedAdvisor?.name || 'Advisor'} is typing a response...
+          </Text>
+        </View>
+      )}
 
       {/* Quick Prompt Chips */}
       {isPremium && (
@@ -242,13 +321,93 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: -0.1
   },
+  advisorStatusBar: {
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  assignedAdvisorBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  advisorAvatarCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#EFF6FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+  },
+  advisorAvatarText: {
+    fontSize: 18,
+  },
+  advisorNameText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  verifiedTag: {
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+    borderRadius: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    marginLeft: 6,
+  },
+  verifiedTagText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#059669',
+    letterSpacing: 0.2,
+  },
+  advisorLicenseText: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  poolStatusBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 2,
+  },
+  poolStatusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#10B981',
+  },
+  poolStatusText: {
+    fontSize: 12,
+    color: '#475569',
+    fontWeight: '600',
+  },
+  typingIndicatorBar: {
+    backgroundColor: '#F8FAFC',
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+  },
+  typingIndicatorText: {
+    fontSize: 11,
+    color: '#2563EB',
+    fontStyle: 'italic',
+    fontWeight: '600',
+  },
   scroller: { 
     flex: 1 
   },
   scrollContent: { 
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 30
+    paddingTop: 16,
+    paddingBottom: 24
   },
   inputWrapper: { 
     width: '100%' 
