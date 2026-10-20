@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "451325656019",
+    "project_id": "capitalloop-auth",
+    "storage_bucket": "capitalloop-auth.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:451325656019:android:1984b62a45badeae0d95e2",
+        "android_client_info": {
+          "package_name": "com.ibad.capitalloop"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "451325656019-cbe10rmdlnpf5oc97efifn7i2rta4lpd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ibad.capitalloop",
+            "certificate_hash": "1984b62a45badeae0d95e2202e27f78edf76e220"
+          }
+        },
+        {
+          "client_id": "451325656019-drjb9j6j2g8hcq99697c3dv2m4nhdbu0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDummyKeyForGoogleServicesInitializationCapitalLoop2026"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "451325656019-drjb9j6j2g8hcq99697c3dv2m4nhdbu0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

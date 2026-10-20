@@ -14,8 +14,7 @@ export default function App() {
     try {
       GoogleSignin.configure({
         webClientId: WEB_CLIENT_ID,
-        offlineAccess: true,
-        forceCodeForRefreshToken: true,
+        offlineAccess: false,
       });
       console.log('✅ GoogleSignin configured at App root');
     } catch (err) {

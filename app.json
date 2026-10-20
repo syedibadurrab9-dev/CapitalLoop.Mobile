@@ -16,7 +16,8 @@
     },
     "android": {
       "package": "com.ibad.capitalloop",
-      "versionCode": 2,
+      "versionCode": 3,
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#0F172A"
       },
