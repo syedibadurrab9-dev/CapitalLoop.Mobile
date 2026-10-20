@@ -40,11 +40,41 @@ export default function AuthScreen({ navigation }: NativeStackScreenProps<any>):
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [showSandboxOptions, setShowSandboxOptions] = useState(false);
+  const [showEditGateway, setShowEditGateway] = useState(false);
   const [serverUrl, setServerUrl] = useState(getApiBaseUrl());
+  const [gatewayStatus, setGatewayStatus] = useState<'idle' | 'checking' | 'connected' | 'error'>('idle');
+  const [gatewayStatusMsg, setGatewayStatusMsg] = useState('');
+
+  const testGatewayConnection = async (urlToTest?: string) => {
+    const target = (urlToTest || serverUrl || getApiBaseUrl()).trim().replace(/\/+$/, '');
+    setGatewayStatus('checking');
+    setGatewayStatusMsg('Testing gateway connection...');
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const res = await fetch(`${target}/openapi/v1.json`, {
+        signal: controller.signal,
+        headers: { Accept: 'application/json' },
+      });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        setGatewayStatus('connected');
+        setGatewayStatusMsg('Core WebApi v1 is reachable');
+      } else {
+        setGatewayStatus('error');
+        setGatewayStatusMsg(`HTTP ${res.status}: Gateway error`);
+      }
+    } catch (err: any) {
+      setGatewayStatus('error');
+      setGatewayStatusMsg(err?.name === 'AbortError' ? 'Connection timed out' : 'Network unreachable');
+    }
+  };
 
   useEffect(() => {
     syncRemoteGatewayUrl().then((synced) => {
+      const url = synced || getApiBaseUrl();
       if (synced) setServerUrl(synced);
+      testGatewayConnection(url);
     });
   }, []);
 
@@ -102,16 +132,19 @@ export default function AuthScreen({ navigation }: NativeStackScreenProps<any>):
    * Exchanges authorization code and PKCE code_verifier with Capital Loop .NET backend
    */
   const exchangeCodeWithBackend = async (authCode: string, codeVerifier?: string) => {
+    const activeUrl = (serverUrl || getApiBaseUrl()).trim().replace(/\/+$/, '');
     try {
       setLoading(true);
 
-      const activeUrl = getApiBaseUrl();
-      const res = await fetch(`${activeUrl}/api/Auth/google-sso`, {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+      const res = await fetch(`${activeUrl}/api/auth/google-sso`, {
         method: 'POST',
+        signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
         },
         body: JSON.stringify({
           token: authCode,
@@ -119,10 +152,11 @@ export default function AuthScreen({ navigation }: NativeStackScreenProps<any>):
           redirectUri,
         }),
       });
+      clearTimeout(timeoutId);
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => null);
-        throw new Error(errorData?.message || `Authentication failed with status ${res.status}`);
+        throw new Error(errorData?.message || `Server responded with HTTP ${res.status}`);
       }
 
       const userData = await res.json();
@@ -140,10 +174,17 @@ export default function AuthScreen({ navigation }: NativeStackScreenProps<any>):
         })
       );
     } catch (err: any) {
-      console.error('[PKCE EXCHANGE ERROR]', err);
+      console.error('[AUTH EXCHANGE ERROR]', err);
+      const isNetworkError =
+        err?.message?.toLowerCase().includes('network') ||
+        err?.message?.toLowerCase().includes('failed to fetch') ||
+        err?.name === 'AbortError';
+
       Alert.alert(
-        'Identity Verification Failed',
-        err?.message || 'Failed to exchange cryptographic authorization code with core server.'
+        isNetworkError ? 'Network Connection Error' : 'Identity Verification Failed',
+        isNetworkError
+          ? `Could not reach backend API at:\n${activeUrl}\n\nTroubleshooting:\n• If using cellular data in Pakistan, your carrier (Jazz/Zong) may restrict *.trycloudflare.com. Connect to Wi-Fi or a VPN.\n• Check the live Gateway Card above or tap "Test" to verify connectivity.`
+          : (err?.message || 'Failed to exchange cryptographic authorization code with core server.')
       );
     } finally {
       setLoading(false);
@@ -270,6 +311,74 @@ export default function AuthScreen({ navigation }: NativeStackScreenProps<any>):
 
         {/* Auth Action Stack */}
         <View style={styles.btnGroup}>
+          {/* Live Cloud Gateway Status Card */}
+          <View style={styles.gatewayCard}>
+            <View style={styles.gatewayHeader}>
+              <View style={styles.gatewayDotGroup}>
+                <View
+                  style={[
+                    styles.statusDot,
+                    gatewayStatus === 'connected'
+                      ? styles.dotGreen
+                      : gatewayStatus === 'checking'
+                      ? styles.dotYellow
+                      : styles.dotRed,
+                  ]}
+                />
+                <Text style={styles.gatewayTitle}>
+                  {gatewayStatus === 'connected'
+                    ? 'Cloud Gateway Live'
+                    : gatewayStatus === 'checking'
+                    ? 'Checking Gateway...'
+                    : 'Gateway Disconnected'}
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => testGatewayConnection()}
+                style={styles.testBtn}
+                disabled={gatewayStatus === 'checking'}
+              >
+                <Text style={styles.testBtnText}>
+                  {gatewayStatus === 'checking' ? '...' : '⚡ Test'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity onPress={() => setShowEditGateway(!showEditGateway)}>
+              <Text style={styles.gatewayUrlText} numberOfLines={1}>
+                {serverUrl}
+              </Text>
+            </TouchableOpacity>
+            {gatewayStatusMsg ? (
+              <Text
+                style={[
+                  styles.gatewayMsgText,
+                  gatewayStatus === 'connected' ? styles.msgGreen : styles.msgRed,
+                ]}
+              >
+                {gatewayStatusMsg}
+              </Text>
+            ) : null}
+            {showEditGateway && (
+              <View style={{ marginTop: 8 }}>
+                <TextInput
+                  style={styles.gatewayInput}
+                  value={serverUrl}
+                  onChangeText={(val) => {
+                    setServerUrl(val);
+                    setApiBaseUrl(val);
+                  }}
+                  placeholder="https://...trycloudflare.com"
+                  placeholderTextColor="#94A3B8"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+                <Text style={{ fontSize: 10, color: '#64748B', marginTop: 3 }}>
+                  Tap '⚡ Test' after updating the URL to verify connection.
+                </Text>
+              </View>
+            )}
+          </View>
+
           {/* Primary: Native Google SSO on Android, PKCE on Web */}
           <ActionButton
             title="Sign in with Google"
@@ -497,5 +606,88 @@ const styles = StyleSheet.create({
   },
   sandboxBtnVipText: {
     color: '#92400E',
+  },
+  gatewayCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    padding: 12,
+    marginBottom: 16,
+    shadowColor: '#0F172A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 1,
+  },
+  gatewayHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  gatewayDotGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  dotGreen: {
+    backgroundColor: '#10B981',
+  },
+  dotYellow: {
+    backgroundColor: '#F59E0B',
+  },
+  dotRed: {
+    backgroundColor: '#EF4444',
+  },
+  gatewayTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  testBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+  },
+  testBtnText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#334155',
+  },
+  gatewayUrlText: {
+    fontSize: 11,
+    color: '#64748B',
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+  },
+  gatewayMsgText: {
+    fontSize: 11,
+    marginTop: 4,
+    fontWeight: '600',
+  },
+  msgGreen: {
+    color: '#059669',
+  },
+  msgRed: {
+    color: '#DC2626',
+  },
+  gatewayInput: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#94A3B8',
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    fontSize: 11,
+    color: '#0F172A',
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
 });

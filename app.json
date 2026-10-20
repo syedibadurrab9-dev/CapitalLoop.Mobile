@@ -16,10 +16,13 @@
     },
     "android": {
       "package": "com.ibad.capitalloop",
+      "versionCode": 2,
       "adaptiveIcon": {
         "backgroundColor": "#0F172A"
       },
       "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
         "android.permission.CAMERA"
       ]
     },
